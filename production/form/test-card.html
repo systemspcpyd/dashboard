@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Card Reference</title>
+    <style>
+		/* test-card.css - Updated Dark Theme */
+
+		/* 1. Base Setup */
+		body { 
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+			line-height: 1.2; 
+			color: #e0e0e0; 
+			margin: 0;
+			padding: 15px; 
+			font-size: 14px; 
+			background-color: #121212; /* Matches dark theme background */
+		}
+
+		/* 2. Headings */
+		h2 { 
+			font-size: 15px; 
+			border-bottom: 2px solid #333; 
+			padding-bottom: 5px; 
+			margin: 0 0 15px 0; 
+			text-transform: uppercase;
+			font-weight: bold;
+			color: #ffffff;
+		}
+
+		/* 3. Table Styling */
+		table { 
+			width: 100%;
+			max-width: 900px;
+			border-collapse: collapse; 
+			background: #1e1e1e; /* Matches panel color */
+			table-layout: fixed; 
+			margin-bottom: 25px; 
+			border-radius: 4px;
+			border: 1px solid #333; /* Darker border */
+		}
+
+		th, td { 
+			border: 1px solid #333; 
+			padding: 10px; 
+			text-align: left; 
+			overflow: hidden; 
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		th { 
+			background-color: #252525; 
+			color: #ffffff;
+			font-size: 11px;
+			text-transform: uppercase;
+		}
+
+		/* 4. Column Widths (Remain unchanged) */
+		.col-brand { width: 22%; }
+		.col-number { width: 38%; }
+		.col-expiry { width: 14%; }
+		.col-cvv   { width: 10%; }
+		.col-pass  { width: 16%; }
+
+		/* 5. Row Styling */
+		.desc-row {
+			background-color: #2a2a2a; /* Darker grey for distinction */
+			font-weight: bold;
+			font-size: 11px;
+			color: #b0b0b0;
+		}
+
+		.mono { 
+			font-family: 'Consolas', 'Monaco', monospace; 
+			font-weight: bold; 
+			font-size: 13px;
+			color: #e0e0e0;
+		}
+
+		.section-spacing { margin-top: 40px; }
+
+    </style>
+</head>
+<body>
+
+    <h2>3Ds Test Card (Gpayment)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th class="col-brand">Scenario / Brand</th>
+                <th class="col-number">Card Number</th>
+                <th class="col-expiry">Expiry</th>
+                <th class="col-cvv">CVV2</th>
+                <th class="col-pass">Password/PIN</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="desc-row"><td colspan="5">Frictionless (No Challenge)</td></tr>
+            <tr>
+                <td>Visa</td><td class="mono">4100000000000100</td><td>3008</td><td>123</td><td>-</td>
+            </tr>
+            <tr>
+                <td>MasterCard</td><td class="mono">5100000000000107</td><td>3008</td><td>123</td><td>-</td>
+            </tr>
+
+            <tr class="desc-row"><td colspan="5">Challenge (Auth Success)</td></tr>
+            <tr>
+                <td>Visa</td><td class="mono">4100000000005000</td><td>3008</td><td>123</td><td>123456</td>
+            </tr>
+            <tr>
+                <td>MasterCard</td><td class="mono">5100000000005007</td><td>3008</td><td>123</td><td>123456</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2 class="section-spacing">Non 3Ds Test Card</h2>
+    <table>
+        <thead>
+            <tr>
+                <th class="col-brand">Card Brand</th>
+                <th class="col-number">Card Number</th>
+                <th class="col-expiry">Expiry</th>
+                <th class="col-cvv">CVV2</th>
+                <th class="col-pass">Password/PIN</th> 
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Visa</td><td class="mono">4005524000000006</td><td>3112</td><td>226</td><td>1234</td>
+            </tr>
+            <tr>
+                <td>Visa</td><td class="mono">4229989999000012</td><td>3112</td><td>871</td><td>1234</td>
+            </tr>
+            <tr>
+                <td>Visa</td><td class="mono">4123580008071115</td><td>3112</td><td>794</td><td>1234</td>
+            </tr>
+            <tr>
+                <td>Visa</td><td class="mono">4940487470001268</td><td>3112</td><td>-</td><td>-</td>
+            </tr>
+            <tr>
+                <td>MasterCard</td><td class="mono">5413330089700026</td><td>1912</td><td>999</td><td>-</td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>
