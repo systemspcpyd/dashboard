@@ -1,0 +1,188 @@
+/* --- 1. Global Reset & Body --- */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f9;
+    /*overflow: hidden;  Locks the main dashboard window */
+}
+
+/* --- 2. Dashboard Layout (The Main Split) --- */
+.dashboard-container {
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    height: 100vh; 
+    gap: 15px;      /* Gap between the two panes */
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+.pane-wrapper {
+    display: flex;
+    flex-direction: column; /* Stacks header (label-bar) on top of the iframe */
+    flex: 1;                /* Splits width 50/50 */
+    height: 100%;           /* Forces column to full dashboard height */
+    overflow: hidden;       /* Keeps the wrapper fixed */
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.label-bar {
+    flex-shrink: 0;         /* Prevents the header from squishing */
+    background: #eeeeee;
+    padding: 12px 15px; 
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+}
+
+.label-bar span {
+    font-size: 13px;
+    font-weight: bold;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* UPDATED: Added overflow-y: auto to allow independent scrolling */
+.pane {
+    flex-grow: 1;           /* Iframe takes all remaining vertical space */
+    width: 100%;
+    border: none;
+    background: #ffffff;
+    overflow-y: auto;       /* Enables the vertical scrollbar inside the iframe */
+    display: block;
+}
+
+/* --- 3. Form Controls Styling (Inside the iframes) --- */
+/* UPDATED: Added min-height to ensure the body can expand */
+body {
+    min-height: 100%;
+}
+
+.controls {
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.controls label {
+    display: block;
+    width: 100%;
+    margin-bottom: 8px; 
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+}
+
+.controls input[type="text"],
+.controls select,
+.controls textarea {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    margin-bottom: 25px;
+    background-color: white !important;
+    color: #333 !important;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 14px;
+}
+
+.controls button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.controls button:hover {
+    background-color: #0056b3;
+}
+
+/* --- 4. Credit Card Visual Styling --- */
+.credit-card-container {
+    position: relative;
+    width: 400px; 
+    height: 250px;
+    margin: 10px auto 30px auto;
+    background: linear-gradient(135deg, #222 0%, #000 100%); 
+    border-radius: 15px; 
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    overflow: hidden; 
+}
+
+.credit-card-container::before {
+    content: '';
+    position: absolute;
+    top: 35%; left: 10%; width: 50px; height: 35px; 
+    background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
+    border-radius: 6px; 
+    z-index: 1; 
+    opacity: 0.8;
+}
+
+.credit-card-container input {
+    position: absolute;
+    background-color: transparent !important; 
+    color: #fff !important; 
+    border: none !important;
+    padding: 5px !important; 
+    margin-bottom: 0 !important;
+    z-index: 2; 
+    font-family: 'Courier New', Courier, monospace; 
+    caret-color: white; 
+    -webkit-text-fill-color: #ffffff !important; 
+}
+
+.card-number-input { top: 60%; left: 8%; width: 85%; font-size: 22px; letter-spacing: 2px; }
+.name-input { top: 82%; left: 8%; width: 50%; font-size: 13px; text-transform: uppercase; }
+.expiry-input { top: 82%; left: 60%; width: 15%; font-size: 13px; text-align: center; }
+.cvv-input { top: 35%; left: 75%; width: 17%; font-size: 13px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.2) !important; }
+
+/* --- 5. Table Styling (For Channel Lists) --- */
+#channel-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+#channel-table th {
+    background: #f8f9fa;
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+}
+
+#channel-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.method-tag {
+    background: #007bff;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+/* This ensures the content inside the iframe knows to fill the space */
+iframe.pane {
+    height: 100% !important;
+}

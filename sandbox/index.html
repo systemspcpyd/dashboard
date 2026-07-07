@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/start.css">
+
+    <script>
+        function resizeIframe(obj) {
+            try {
+                // Ensure the iframe has content before trying to access it
+                if (obj.contentWindow && obj.contentWindow.document.body) {
+                    obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+                }
+            } catch (e) {
+                console.error("Resize error: ", e);
+            }
+        }
+
+        // Attach the listener once the DOM is ready
+        window.addEventListener('DOMContentLoaded', () => {
+            const iframe = document.getElementById('left-container');
+            if (iframe) {
+                iframe.addEventListener('load', function() {
+                    resizeIframe(this);
+                });
+            }
+        });
+    </script>
+</head>
+<body>
+
+    <header class="top-header">
+        <h1>Payment UAT Page</h1>
+    </header>
+
+    <div class="controls">
+        <a href="form/index-mpi-non-hosted.html" target="formDisplay">MPI - Non Hosted Page</a>
+        <a href="form/pag-hosted.html" target="formDisplay">PAG - Hosted Page</a>
+        <a href="form/index-pag-non-hosted.html" target="formDisplay">PAG - Non Hosted Page</a>
+        <a href="form/mpigwv2.html" target="formDisplay">Dummy PAG</a>
+    </div>
+
+    <div class="container">
+        <div class="left-panel">
+            <iframe
+                id="left-container"
+                name="formDisplay"
+                src="about:blank"
+                title="Embedded Form Display"
+                style="width: 100%; border: none;">
+                Sorry, your browser does not support iframes.
+            </iframe>
+        </div>
+    </div>
+</body>
+</html>

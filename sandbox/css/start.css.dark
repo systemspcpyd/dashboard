@@ -1,0 +1,56 @@
+/* start.css - Dark Mode */
+:root {
+    --bg-page:       #1a1a1a;
+    --bg-primary:    #212121;
+    --text-primary:  #ececec;
+    --border:        rgba(255,255,255,0.1);
+    --accent-blue:   #378ADD;
+}
+
+body { 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    margin: 0; 
+    padding: 20px;
+}
+
+.controls { margin-bottom: 20px; }
+
+.controls a {
+    display: inline-block;
+    padding: 8px 16px;
+    margin-right: 10px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    text-decoration: none;
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.controls a:hover {
+    background-color: var(--accent-blue);
+    color: #fff;
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    height: 80vh; 
+    gap: 20px;
+}
+
+.left-panel, .right-panel {
+    flex: 1; 
+    display: flex; 
+    flex-direction: column;
+}
+
+#left-container {
+    border: 0.5px solid var(--border);
+    background-color: var(--bg-primary);
+    border-radius: 8px;
+    width: 100%;
+    height: 100%;
+}
