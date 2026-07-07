@@ -44,6 +44,18 @@
         function openPage(url) {
             document.getElementById('viewer').src = url;
         }
+
+        // --- ADD THIS PART ---
+        // This listens for 'scrollToTop' messages sent from inside the iframe
+        window.addEventListener("message", (event) => {
+            // Optional: You can add an 'if' check here to only accept messages from your domain
+            // if (event.origin !== "https://systemspcpyd.github.io") return;
+
+            if (event.data.action === 'scrollToTop') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+        
     </script>
 </body>
 </html>
