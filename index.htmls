@@ -30,9 +30,9 @@
     <div class="layout">
         <div class="sidebar">
             <h2>SS Dashboard</h2>
-            <button class="nav-btn" onclick="openPage('https://systemspcpyd.github.io/payment-page/')">UAT Page Testing</button>
-            <button class="nav-btn" onclick="openPage('https://systemspcpyd.github.io/stress-testing/')">Stress Testing</button>
-            <button class="nav-btn" onclick="openPage('https://systemspcpyd.github.io/prodpayment-page/')">Production Testing</button>
+            <button class="nav-btn" onclick="openPage('https://systemspc.vercel.app/sandbox/')">UAT Page Testing</button>
+            <button class="nav-btn" onclick="openPage('https://systemspc.vercel.app/stress-testing/')">Stress Testing</button>
+            <button class="nav-btn" onclick="openPage('https://systemspc.vercel.app/production/')">Production Testing</button>
         </div>
 
         <div class="content">
