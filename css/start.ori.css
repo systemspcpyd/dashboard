@@ -1,0 +1,110 @@
+/* styles.css */
+
+/* 1. Base Setup: Full height to prevent page scrolling */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    overflow: hidden; /* Only the panels should scroll */
+}
+
+/* 2. Header and Controls */
+.top-header {
+    background-color: #007bff;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px; /* Fixed height for header */
+    box-sizing: border-box;
+}
+
+.top-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.controls { 
+    padding: 10px 20px;
+    height: 50px; /* Fixed height for controls */
+}
+
+.controls a {
+    display: inline-block;
+    padding: 10px 15px;
+    margin-right: 10px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.controls a:hover {
+    background-color: #0056b3;
+}
+
+/* 3. Main Layout: Two-Panel Container */
+.container {
+    display: flex;
+    width: 100%;
+    /* Subtract header and controls height from viewport */
+    height: calc(100vh - 110px); 
+    gap: 20px;
+    padding: 0 10px 10px 10px;
+    box-sizing: border-box;
+}
+
+.left-panel, .right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+}
+
+/* 4. Left Panel (Iframe) */
+#left-container {
+    border: 1px solid #ccc;
+    width: 100%;
+    height: 100%; /* Fills the panel */
+    flex-grow: 1;
+    overflow: auto; /* Allows the iframe to scroll if content is long */
+}
+
+/* 5. Right Panel (Static Content) */
+.file-content {
+    margin-bottom: 10px;
+}
+
+.static-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Adds scrollbar to the right panel */
+    border: 1px solid #ddd;
+}
+
+.right-panel embed {
+    border: 1px solid #ddd;
+    width: 100%;
+    height: 150px;
+    display: block;
+}
+
+.right-panel object {
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+}
+
+/* 6. Utility */
+.btn-back {
+    background-color: white;
+    color: #007bff;
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-weight: bold;
+}

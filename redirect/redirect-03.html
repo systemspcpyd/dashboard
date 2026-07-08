@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment QR & Status Inquiry</title>
+    <link rel="stylesheet" href="../../css/form.css">
+    <style>
+        /* Extra overrides to fit the dark theme */
+        body { background-color: #121212 !important; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .qr-card { background: #1e1e1e; padding: 30px; border-radius: 8px; border: 1px solid #333; width: 400px; text-align: center; }
+        
+        #qr-code-image { width: 220px; height: 220px; margin: 10px auto; display: none; border: 1px solid #333; }
+        .timer-display { font-size: 32px; font-weight: bold; color: #ff4757; margin: 10px 0; font-family: monospace; }
+        
+        /* Reusing your form.css classes for inputs */
+        .controls label { color: #e0e0e0; }
+        .controls input { background-color: #1e1e1e !important; border: 1px solid #333 !important; color: #fff !important; }
+        .btn-check { padding: 10px 20px; background-color: #1e1e1e; color: #007bff; border: 1px solid #007bff; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
+        .btn-check:hover { background-color: #007bff; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="payment-container">
+        <div class="qr-card">
+            <h2 style="color: #fff; margin-top: 0;">DuitNow QR</h2>
+            
+            <div id="qr-section" style="display: none;">
+                <p style="font-size: 14px; color: #b0b0b0;">Scan with your mobile banking app</p>
+                <img id="qr-code-image" src="">
+                <div id="countdown-display" class="timer-display">00:00</div>
+                <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Ref: <span id="ref-display"></span></p>
+                <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+            </div>
+
+            <div class="controls" style="padding: 0;">
+                <div style="text-align: left; margin-bottom: 15px;">
+                    <label>TRANSACTION ID</label>
+                    <input type="text" id="manual_trxn_id" placeholder="PAGUAT...">
+                </div>
+
+                <div style="text-align: left; margin-bottom: 15px;">
+                    <label>AMOUNT (IN CENTS)</label>
+                    <input type="number" id="manual_amount" placeholder="100">
+                </div>
+            </div>
+
+            <button class="btn-check" onclick="triggerInquiry()">Check Status Now</button>
+            <p id="inquiry-status-text" style="color: #e0e0e0;"></p>
+        </div>
+    </div>

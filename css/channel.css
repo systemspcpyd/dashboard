@@ -1,0 +1,93 @@
+/* channel.css - Updated Dark Theme */
+
+/* General Body Styling */
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+    padding: 15px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Button Styling */
+.btn-refresh {
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #1e1e1e;
+    color: #007bff;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.btn-refresh:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Response Container & Table */
+#response-container {
+    margin-top: 20px;
+    display: none;
+}
+
+#response-container h3 {
+    color: #ffffff;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+}
+
+#channel-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+}
+
+#channel-table thead {
+    background-color: #252525;
+}
+
+#channel-table th, 
+#channel-table td {
+    padding: 12px;
+    border: 1px solid #333;
+    text-align: left;
+    color: #e0e0e0;
+}
+
+#channel-table th {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #ffffff;
+}
+
+/* Dynamic Row Styles */
+/* Changed from light grey to a dark tone so text is readable */
+.row-header {
+    /* Pure black background */
+    background-color: #121212 !important; 
+    /* Slightly muted but visible text */
+    color: #aaaaaa !important; 
+    
+    /* Adds a subtle top/bottom border to separate it from data rows */
+    border-top: 1px solid #333 !important;
+    border-bottom: 1px solid #333 !important;
+    
+    /* Optional: Adds a small accent bar to the left for a 'professional' look */
+    border-left: 4px solid #007bff !important;
+    
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+/* Striking green for dark mode readability */
+.status-active { 
+    color: #39ff14; 
+    font-weight: bold;
+}
+
+.status-offline { 
+    color: #ff4d4d; 
+    font-weight: bold; 
+}

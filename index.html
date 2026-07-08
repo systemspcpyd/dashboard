@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SS Dashboard</title>
+    <style>
+        /* Dark Theme Integration */
+        body, html { height: 100%; margin: 0; padding: 0; background-color: #121212; color: #e0e0e0; font-family: sans-serif; overflow: hidden; }
+        
+        .layout { display: flex; height: 100vh; }
+        
+        /* Sidebar Styling */
+        .sidebar { width: 260px; background: #1e1e1e; border-right: 1px solid #333; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
+        .sidebar h2 { font-size: 1.5rem; color: #ffffff; margin-bottom: 20px; }
+        
+        .nav-btn {
+            background: #252525; border: 1px solid #333; color: #e0e0e0; padding: 12px; margin-bottom: 10px;
+            cursor: pointer; border-radius: 5px; text-align: left; transition: 0.2s; font-size: 14px;
+        }
+        .nav-btn:hover { border-color: #007bff; color: #007bff; }
+        
+        /* Main Viewport */
+        .content { flex-grow: 1; background: #000; }
+        iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+
+    <div class="layout">
+        <div class="sidebar">
+            <h2>SS Dashboard</h2>
+            <button class="nav-btn" onclick="openPage('https://systemspc.vercel.app/sandbox/index.html')">UAT Page Testing</button>
+            <button class="nav-btn" onclick="openPage('https://systemspc.vercel.app/stress-testing/index.html')">Stress Testing</button>
+            <button class="nav-btn" onclick="openPage('https://systemspc.vercel.app/production/index.html')">Production Testing</button>
+        </div>
+
+        <div class="content">
+            <iframe id="viewer" src="about:blank"></iframe>
+        </div>
+    </div>
+
+    <script>
+        function openPage(url) {
+            document.getElementById('viewer').src = url;
+        }
+
+        // --- ADD THIS PART ---
+        // This listens for 'scrollToTop' messages sent from inside the iframe
+        window.addEventListener("message", (event) => {
+            // Optional: You can add an 'if' check here to only accept messages from your domain
+            // if (event.origin !== "https://systemspcpyd.github.io") return;
+
+            if (event.data.action === 'scrollToTop') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+        
+    </script>
+</body>
+</html>

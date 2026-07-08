@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <link rel="stylesheet" href="../../css/form.css">
+    
+</head>
+
+<div class="controls">
+<body> 
+
+ <form id="form" method="post" action="" >
+
+
+            <label for="MPI_REDIRECT_HTTP_METHOD">MPI_REDIRECT_HTTP_METHOD:</label>
+             <input type="text" name="MPI_REDIRECT_HTTP_METHOD" id="MPI_REDIRECT_HTTP_METHOD" maxlength="15" >
+
+            <label for="MPI_REDIRECT_URL">MPI_REDIRECT_URL (URL) :</label>
+			 <textarea name="MPI_REDIRECT_URL" id="MPI_REDIRECT_URL" maxlength="300" rows="3" cols="100" ></textarea>
+
+            <label for="MPI_REDIRECT_HTTP_DATA">MPI_REDIRECT_HTTP_DATA (http body):</label>
+			 <textarea name="MPI_REDIRECT_HTTP_DATA" id="MPI_REDIRECT_HTTP_DATA" maxlength="2000" rows="20" cols="100" ></textarea>
+
+ </form>
+    
+   <button onclick="redirect()">Redirect to Provider
+   
+</body>
+
+
+<script>
+// 1. Get the data from the URL
+        const params = new URLSearchParams(window.location.search);
+
+        // 2. Map URL parameters to Form IDs
+        const fields = ['MPI_REDIRECT_HTTP_METHOD', 'MPI_REDIRECT_URL', 'MPI_REDIRECT_HTTP_DATA'];
+
+        fields.forEach(field => {
+            const value = params.get(field);
+            if (value) {
+                document.getElementById(field).value = value;
+            }
+        });
+
+        // Optional: If you want the form to submit to the bank automatically, 
+        // you would set the form's 'action' to the MPI_REDIRECT_URL 
+        // and call document.getElementById('form').submit();
+	
+function redirect() {
+    let url = document.getElementById("MPI_REDIRECT_URL").value.trim();   
+	let mtd = document.getElementById("MPI_REDIRECT_HTTP_METHOD").value.trim();
+    let dataRaw = document.getElementById("MPI_REDIRECT_HTTP_DATA").value.trim();
+
+    let mapForm = document.createElement("form");
+    mapForm.method = mtd;
+    mapForm.action = url;
+    
+    // FIX: Set target to _top to break out of any frames
+    // Use "_blank" if you want to open the bank in a new tab instead
+    mapForm.target = "_top"; 
+
+    try {
+        let jsonData = JSON.parse(dataRaw);
+        
+        for (var key in jsonData) {
+            if (jsonData.hasOwnProperty(key)) {
+                let input = document.createElement("input");
+                input.type = "hidden";
+                input.name = key;
+                input.value = jsonData[key];
+                mapForm.appendChild(input);
+            }
+        }
+
+        document.body.appendChild(mapForm);
+        mapForm.submit();
+        
+    } catch (e) {
+        alert("JSON Error: " + e.message);
+    }
+}
+
+</script>
+
+
+</html>

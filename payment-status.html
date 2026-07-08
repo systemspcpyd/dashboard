@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Receipt</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding: 40px; }
+        .receipt-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        .status-badge { text-align: center; padding: 10px; border-radius: 8px; font-weight: bold; margin-bottom: 20px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .failed { background-color: #f8d7da; color: #721c24; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; color: #777; font-size: 0.85rem; padding: 10px 0; border-bottom: 1px solid #eee; text-transform: uppercase; }
+        td { padding: 12px 0; color: #333; font-weight: 500; border-bottom: 1px solid #eee; word-break: break-all; }
+        .footer { text-align: center; margin-top: 25px; }
+        .btn { background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<div class="receipt-card">
+    <h2 id="title">Payment Result</h2>
+    <div id="status-banner" class="status-badge">Processing...</div>
+
+    <table>
+        <tbody id="details-body">
+            </tbody>
+    </table>
+
+<div class="footer">
+    <a href="https://systemspcpyd.github.io/payment-page/" target="_top" class="btn">Return Home</a>
+</div>
+</div>
+
+<script>
+    // 1. Grab data from the URL
+    const params = new URLSearchParams(window.location.search);
+    const tableBody = document.getElementById('details-body');
+    const statusBanner = document.getElementById('status-banner');
+    
+    // 2. Define the fields we want to show (based on your bank's response)
+    const fieldsToShow = {
+        'MPI_ERROR_CODE': 'Status',        
+        'MPI_ERROR_DESC': 'Notes',
+        'MPI_REFERRAL_CODE': 'Referral Code',
+        'MPI_MERC_ID': 'Merchant ID',
+        'MPI_TRXN_ID': 'Transaction ID',
+        'MPI_CUST_PAYMENT_METHOD': 'Payment Method',
+        'MPI_BUYER_BANK': 'Bank Name'
+    };
+
+    // 3. Update Status Banner
+    const status = params.get('MPI_ERROR_CODE');
+    if (status === "000") {
+        statusBanner.innerText = "✓ TRANSACTION SUCCESSFUL";
+        statusBanner.className = "status-badge success";
+    } else {
+        statusBanner.innerText = "✕ TRANSACTION FAILED";
+        statusBanner.className = "status-badge failed";
+    }
+
+    // 4. Inject rows into the table
+    Object.keys(fieldsToShow).forEach(key => {
+        const val = params.get(key);
+        if (val) {
+            const row = `<tr>
+                <th>${fieldsToShow[key]}</th>
+                <td>${val}</td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        }
+    });
+</script>
+
+</body>
+
+</html>
+
+
+

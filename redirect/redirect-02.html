@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="../../css/form.css">
+    <title>Provider Redirection</title>
+</head>
+<body> 
+    <div class="controls">
+        <h2>Redirecting to Provider...</h2>
+        <form id="form">
+            <label for="MPI_REDIRECT_HTTP_METHOD">Method:</label>
+            <input type="text" id="MPI_REDIRECT_HTTP_METHOD" readonly>
+
+            <label for="MPI_REDIRECT_URL">Destination URL:</label>
+            <textarea id="MPI_REDIRECT_URL" rows="3" cols="100" readonly></textarea>
+            
+            <input type="hidden" id="MPI_REDIRECT_HTTP_DATA">
+        </form>
+
+		<button class="btn-redirect" onclick="redirect()">
+			CLICK HERE TO REDIRECT
+		</button>
+    </div>
+
+<script>
+// 1. Get the data from the URL on page load
+    const params = new URLSearchParams(window.location.search);
+    
+    // Fill the UI for review
+    const targetUrl = params.get('MPI_REDIRECT_URL') || '';
+    const targetMethod = params.get('MPI_REDIRECT_HTTP_METHOD') || 'GET';
+
+    document.getElementById('MPI_REDIRECT_URL').value = targetUrl;
+    document.getElementById('MPI_REDIRECT_HTTP_METHOD').value = targetMethod;
+
+    function redirect() {
+        const url = document.getElementById("MPI_REDIRECT_URL").value.trim();
+        const mtd = document.getElementById("MPI_REDIRECT_HTTP_METHOD").value.trim().toUpperCase();
+
+        if (!url) {
+            alert("Error: No Redirect URL found.");
+            return;
+        }
+
+        // IF THE METHOD IS GET:
+        // Use location.replace to simulate a direct browser entry.
+        // This clears the "Referer" and context that often causes failures.
+        if (mtd === "GET") {
+            window.top.location.replace(url);
+        } else {
+            // IF THE METHOD IS POST:
+            // Use the hidden form method as before.
+            let mapForm = document.createElement("form");
+            mapForm.method = "POST";
+            mapForm.action = url;
+            mapForm.target = "_top"; 
+            document.body.appendChild(mapForm);
+            mapForm.submit();
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/form.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.27/jsrsasign-all-min.js"></script>
+    <title>Payment Page</title>
+</head>
+<body> 
+    <div class="controls">
+        <form id="form" method="post" action="">
+            <input type="hidden" name="MPI_RETURN_URL" id="MPI_RETURN_URL" value="">
+
+            <label for="MPI_TRANS_TYPE">MPI_TRANS_TYPE (Transaction Type):</label>
+            <select name="MPI_TRANS_TYPE" id="MPI_TRANS_TYPE">
+                <option value="SALES">SALES</option>
+                <option value="INITRECURR">INITRECURR</option>
+                <option value="PRERECURR">PRERECURR</option>
+                <option value="PREAUTH">PREAUTH</option>
+            </select>
+
+            <label for="MPI_MERC_ID">MPI_MERC_ID (MID):</label>
+            <input type="text" name="MPI_MERC_ID" id="MPI_MERC_ID" value = "SYSSPC000000001" maxlength="15">
+
+            <label for="MPI_PURCH_DATE">MPI_PURCH_DATE (Datetime) :</label>
+            <input type="text" name="MPI_PURCH_DATE" id="MPI_PURCH_DATE" maxlength="14">
+
+            <label for="MPI_TRXN_ID">MPI_TRXN_ID (Transaction ID):</label>
+            <input type="text" name="MPI_TRXN_ID" id="MPI_TRXN_ID" maxlength="20">
+
+            <label for="MPI_PURCH_CURR">MPI_PURCH_CURR (Currency: MYR only):</label>
+            <input type="text" name="MPI_PURCH_CURR" id="MPI_PURCH_CURR" value='458' maxlength="3">
+
+            <label for="MPI_PURCH_AMT">MPI_PURCH_AMT (Amount):</label>
+            <input type="text" name="MPI_PURCH_AMT" id="MPI_PURCH_AMT" maxlength="19">
+
+            <label for="MPI_RESPONSE_TYPE">MPI_RESPONSE_TYPE:</label>
+            <select name="MPI_RESPONSE_TYPE" id="MPI_RESPONSE_TYPE">
+                <option value="JSON">JSON</option>
+                <option value="STRING">STRING</option>
+            </select>
+			
+            <label for="MPI_ADDITIONAL_INFO_IND">MPI_ADDITIONAL_INFO_IND:</label>
+            <select name="MPI_ADDITIONAL_INFO_IND" id="MPI_ADDITIONAL_INFO_IND">
+                <option value=""></option>
+                <option value="Y">Y</option>
+            </select>
+			
+            <label for="MPI_PAYMENT_CHANNEL_ID">MPI_PAYMENT_CHANNEL_ID:</label>
+            <input type="text" name="MPI_PAYMENT_CHANNEL_ID" id="MPI_PAYMENT_CHANNEL_ID" value="PAYDEE_PAY" maxlength="30">
+
+            <label for="MPI_MAC">MPI_MAC (Signed MAC) :</label>
+            <textarea name="MPI_MAC" id="MPI_MAC" maxlength="344" rows="5" cols="100"></textarea>
+        </form>
+
+        <hr>
+        <button onclick="clear_mac()">Generate MAC</button><br>
+        <textarea id="mac" rows="1" cols="90" readonly></textarea><br> 
+
+        <button onclick="mkReq()">Key Exchange</button>
+        <button type="button" onclick="mpReq()">Pay</button><br><br>
+
+        <form id="redirect-form" method="POST" style="display:none;"></form>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const KEY_EXCHANGE_URL = "https://devlinkv2.paydee.co/mpigwv2/mkReq";
+        const PAYMENT_REQUEST_URL = "https://devlinkv2.paydee.co/mpigwv2/mpReq";
+        const GET_CHANNEL_URL = "https://devlinkv2.paydee.co/mpigwv2/channels";
+        const PUBLICKEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq8j2SHHfzMLlhYppnlk-QqjjjZwMkhK6s6rERd0JhhY_6-Md4Z0327uEdfNbJrSEPJVPT55gjRhx4MorEhrabuafuY8thSPS4epwkOjjPtELwZxViWe1dzG5TQakJ_i8ZOQuUYFJg02RcwUTzE3ty-x7mkwj9t2wAdRqTagyaDIAVMTxP_Y4AS76xjA3aH43Q0HKHGAxxIlXBIQxImuPhlUbPtVtTHIsUwkIx2BDh8kPZ3Mgr3Cyky0F-cHpEFSi3rPSSLD_FVHlJRW2cODVm8E-s98CURQYs1npzDztzZgZPnnb9K57CB2Z50Ve6qUV7z4-uHs3nehiMJHktIs7LQIDAQAB";
+    	const VERCEL_CALLBACK_URL = "https://systemspc.vercel.app/api/callback"
+        const PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
+        MIIEogIBAAKCAQEAq8j2SHHfzMLlhYppnlk+QqjjjZwMkhK6s6rERd0JhhY/6+Md
+        4Z0327uEdfNbJrSEPJVPT55gjRhx4MorEhrabuafuY8thSPS4epwkOjjPtELwZxV
+        iWe1dzG5TQakJ/i8ZOQuUYFJg02RcwUTzE3ty+x7mkwj9t2wAdRqTagyaDIAVMTx
+        P/Y4AS76xjA3aH43Q0HKHGAxxIlXBIQxImuPhlUbPtVtTHIsUwkIx2BDh8kPZ3Mg
+        r3Cyky0F+cHpEFSi3rPSSLD/FVHlJRW2cODVm8E+s98CURQYs1npzDztzZgZPnnb
+        9K57CB2Z50Ve6qUV7z4+uHs3nehiMJHktIs7LQIDAQABAoIBAAufb7vBaf0ugfKx
+        8D56AaKR+b925korK+hZw/40G9+veV4KQlclrjCsSc854BoeJET9wd18X5em++wp
+        Juvf1uqiU6lC54y2up8gH8NLi+CP//shYDoz7aJlwgiqS94L0CIFZvWLHqsHIFxc
+        uhUHKsaINr60VcnvVZLHc/UoIwJLT1Hk2gIMnxxnCqkL1m/BNDeYaT30DLMPaeby
+        naEsq6JG+pk0szJ9ivTZQrVzWL88qYJor7eR+MGBh65fhhSZyn229EL9DtwVGkU2
+        8rlFwcCalhmCIgJO9vPK3QLoomT4FfokuECrxv0UwopYPBXyUycvzHmvbFTt5FS8
+        KLgfMcMCgYEAwqKKSeAuoQpJO4x8hP7fYQ94ezoRkDlV9Q5ICcgJW6giMbzT2adg
+        d2nuxQIwLRX/P4Dwh2OxCnOrX1FAMxmbs9/6OGgjHhKAAM0pIowZFs4Vqu/QlAZ5
+        UdPzHdGuA5oSEBhVMxe0L1dWbQr0UpjemH6gOfswDFYsIawLXOPI+TsCgYEA4fIm
+        QqKIBoYAGUPuNfjoK2ZQpRaFGAGuvfpSyljMQDnYJJtOGTW8SI0QFzd31snYx5yP
+        vEvkR4lEcVPi6t6Mkdd4KVkmktdjIQ0ZOAlbBaaEWFy6lN7TyINJ7BAYFO/1D3Uj
+        4Gi9O7dV7v49Bzp5tVNFrUihM1yfOdUfP3gCFrcCgYB8YtoT6mSCYIt6tgaiDCx/
+        4B40SmENFcdcTBs3vRJV9DaeKLoPIEujJR0F5KcbOTKdx+5v6AMt1cxQpyFrRtNd
+        +ib0Q4El59bMLFE8leI208+/JXHcF+MSq2x0wxr9jEo85QAWHfD2TE+ccmLAIpgn
+        Rs1pIKGNUMj1X/kHDT/UHwKBgAsmSeEL6C56OlME2SJsr/hESkJ7RAIVQyw4yBEY
+        JKwerp3P1CDGWA40d9DNeeptd3cSML2X+SHWkjwNaasxZDpmKZXQwmiInGmrHc14
+        GLfEqc86dDKYdFb2s5UkjiuqU6t5mlWelYf22hS7EwPiTNM30r5kUSAZt/nAnJQj
+        NectAoGADXNyBnmq65m1YMlWe+PtDEi/hUZagVDPG7xh3T811fAi6+TZSLXCDVR4
+        gju9FJkwjce29Bmt7xbFYRvIfVUGbuvMxvgBJG4A2BG8wrFbIGDLQEk5VYBvSkKK
+        hniCoSnVEJYlfgyp9ri1vEgXrX18FwY1KADRc4EnDlEzwkkAAl0=
+        -----END RSA PRIVATE KEY-----`;
+
+        // Initialize form action
+        document.getElementById("form").action = PAYMENT_REQUEST_URL;
+
+        /**
+         * MP REQ - Main Payment Submission
+         * Uses native form submission to Gateway to avoid CORS errors.
+         */
+async function mpReq() {
+
+	// ---  Scrolls the main parent page to the top ---
+    window.top.scrollTo({ top: 0, behavior: 'smooth' });
+	
+    const form = document.getElementById("form");
+    const payButton = document.querySelector("button[onclick='mpReq()']");
+    const responseType = document.getElementById("MPI_RESPONSE_TYPE").value;
+
+    // 1. Prepare fields (Set Return URL and handle empty fields)
+    document.getElementById("MPI_RETURN_URL").value = VERCEL_CALLBACK_URL;
+    
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        if (!input.value.trim()) {
+            input.disabled = true; // Essential for correct MAC generation on server
+        }
+    });
+
+    // --- CASE A: Standard Form Redirect (No Response Type) ---
+    if (!responseType) {
+        payButton.disabled = true;
+        payButton.innerText = "Redirecting to Gateway...";
+        form.submit();
+        
+        // Re-enable for UI consistency if they hit 'back'
+        setTimeout(() => {
+            inputs.forEach(input => input.disabled = false);
+            payButton.disabled = false;
+            payButton.innerText = "Pay";
+        }, 2000);
+        return; 
+    }
+
+    // --- CASE B: Capture JSON and Forward (JSON/STRING Response Type) ---
+    payButton.disabled = true;
+    payButton.innerText = "Processing JSON...";
+
+    // Re-enable temporarily to gather data for fetch
+    inputs.forEach(input => input.disabled = false);
+    const formData = new FormData(form);
+    const payload = new URLSearchParams();
+    
+    formData.forEach((value, key) => {
+        if (value.trim() !== "") payload.append(key, value);
+    });
+
+try {
+    const response = await fetch(PAYMENT_REQUEST_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: payload
+    });
+
+    const data = await response.json();
+
+    // --- REDIRECT LOGIC ---
+    const callbackForm = document.getElementById("redirect-form");
+    
+    // FORCE the action to use your Vercel URL from config
+    callbackForm.action = VERCEL_CALLBACK_URL; 
+    callbackForm.method = "POST";
+    callbackForm.innerHTML = ""; 
+
+    Object.keys(data).forEach(key => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = typeof data[key] === 'object' ? JSON.stringify(data[key]) : data[key];
+        callbackForm.appendChild(input);
+    });
+
+    // Now this will POST to Vercel, not GitHub!
+    callbackForm.submit();
+
+} catch (error) {
+    console.error('Error:', error);
+    alert("Fetch failed. Check CORS or network.");
+}
+}
+
+
+        /**
+         * MK REQ - Key Exchange
+         * Handles the background communication for keys.
+         */
+        async function mkReq() {
+            let MID = document.forms["form"]["MPI_MERC_ID"].value;
+            let transactionID = document.forms["form"]["MPI_TRXN_ID"].value;
+
+            const myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+
+            const raw = JSON.stringify({
+                "merchantId": MID,
+                "pubKey": PUBLICKEY,
+                "purchaseId": transactionID
+            });
+
+            const requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw
+            };
+
+            try {
+                const response = await fetch(KEY_EXCHANGE_URL, requestOptions);
+                const result = await response.json(); 
+
+                if (result.errorCode === "000") {
+                    alert(`✅ Success!\nCode: ${result.errorCode}\nMessage: ${result.errorMessage || 'Key Exchange successful.'}`);
+                } else {
+                    alert(`❌ Key Exchange Failed\nError Code: ${result.errorCode}\nMessage: ${result.errorMessage || 'Error'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert("⚠️ Connection Blocked: Check if the server allows CORS for fetch requests.");
+            }
+        }
+
+        /**
+         * MAC UTILITIES
+         */
+        function clear_mac() {
+             let rawString = 
+                document.forms["form"]["MPI_TRANS_TYPE"].value + 
+                document.forms["form"]["MPI_MERC_ID"].value + 
+                document.forms["form"]["MPI_TRXN_ID"].value +
+                document.forms["form"]["MPI_PURCH_DATE"].value +
+                document.forms["form"]["MPI_PURCH_CURR"].value +
+                document.forms["form"]["MPI_PURCH_AMT"].value +
+                document.forms["form"]["MPI_RESPONSE_TYPE"].value +
+                document.forms["form"]["MPI_ADDITIONAL_INFO_IND"].value +
+                document.forms["form"]["MPI_PAYMENT_CHANNEL_ID"].value;
+
+          document.getElementById("mac").value = rawString;
+
+                      try {
+                // CLEAN THE KEY HERE
+                const CLEAN_KEY = PRIVATE_KEY.replace(/^[ \t]+/gm, '');
+        
+                let sig = new KJUR.crypto.Signature({"alg": "SHA256withRSA"});
+                sig.init(CLEAN_KEY); 
+                sig.updateString(rawString);
+                let sigValueHex = sig.sign();
+                
+                let base64Value = hextob64(sigValueHex);
+                let base64UrlValue = base64Value
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=/g, '');
+        
+                document.forms["form"]["MPI_MAC"].value = base64UrlValue;
+                
+            } catch (e) {
+                console.error("Signing Error:", e);
+                alert("Error generating MAC. Make sure the private key is formatted correctly.");
+            }
+          
+        }
+
+        function trim_mac() {
+            let macElement = document.forms["form"]["MPI_MAC"];
+            let rawMac = macElement.value;
+            let trimmedMac = rawMac.replace(/[+]/g, "-")
+                                   .replace(/[/]/g, "_")
+                                   .replace(/[=]/g, "");
+            macElement.value = trimmedMac;
+        }
+
+        /**
+         * DATE & ID INITIALIZATION
+         */
+        function initFields() {
+            let d = new Date();
+            let x = d.getFullYear() + 
+                    (d.getMonth() + 1).toString().padStart(2, '0') + 
+                    d.getDate().toString().padStart(2, '0') + 
+                    d.getHours().toString().padStart(2, '0') + 
+                    d.getMinutes().toString().padStart(2, '0') + 
+                    d.getSeconds().toString().padStart(2, '0');
+            
+            document.forms["form"]["MPI_PURCH_DATE"].value = x;
+            document.forms["form"]["MPI_TRXN_ID"].value = "DMYPAG" + x;
+        }
+
+        // Run on load
+        initFields();
+
+    </script>
+</body>
+</html>
