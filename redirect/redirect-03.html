@@ -49,3 +49,61 @@
             <p id="inquiry-status-text" style="color: #e0e0e0;"></p>
         </div>
     </div>
+    <form id="inq-form" method="post" action="https://devlinkv2.paydee.co/mpigw/mpReq" target="inq_frame" style="display:none;">
+        <input type="hidden" name="MPI_RETURN_URL" value="https://payment-page-virid.vercel.app/api/callback">
+        <input type="hidden" name="MPI_TRANS_TYPE" value="INQ">
+        <input type="hidden" name="MPI_MERC_ID" value="000000000000003">
+        <input type="hidden" name="MPI_PURCH_DATE" id="INQ_PURCH_DATE">
+        <input type="hidden" name="MPI_TRXN_ID" id="INQ_TRXN_ID">
+        <input type="hidden" name="MPI_ORI_TRXN_ID" id="INQ_ORI_TRXN_ID">
+        <input type="hidden" name="MPI_PURCH_CURR" value="458">
+        <input type="hidden" name="MPI_PURCH_AMT" id="INQ_PURCH_AMT">
+        <textarea name="MPI_MAC" id="INQ_MAC"></textarea>
+    </form>
+    <iframe name="inq_frame" style="display:none;"></iframe>
+
+    <script src="inquiry-handler.js"></script>
+    <script>
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            const qr = params.get('MPI_QR_CODE');
+            const expiry = params.get('MPI_QR_EXPIRY_SECONDS');
+            const tid = params.get('MPI_TRXN_ID') || params.get('MPI_TXN_ID');
+            const amt = params.get('MPI_PURCH_AMT');
+
+            // 1. Fill inputs (Manual entry fallback)
+            if (tid) document.getElementById('manual_trxn_id').value = tid;
+            if (amt) document.getElementById('manual_amount').value = amt;
+
+            // 2. Setup QR display and Timer
+            if (qr && expiry) {
+                document.getElementById('qr-code-image').src = "data:image/png;base64," + qr;
+                document.getElementById('qr-code-image').style.display = "block";
+                document.getElementById('qr-section').style.display = "block";
+                document.getElementById('ref-display').innerText = tid;
+                startTimer(parseInt(expiry));
+            }
+        };
+
+        function startTimer(seconds) {
+            let timer = seconds;
+            const display = document.getElementById('countdown-display');
+            const countdown = setInterval(function () {
+                let minutes = parseInt(timer / 60, 10);
+                let seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = minutes + ":" + seconds;
+
+                if (--timer < 0) {
+                    clearInterval(countdown);
+                    display.textContent = "EXPIRED";
+                    display.style.color = "#888";
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
