@@ -19,11 +19,11 @@ export default function handler(req, res) {
         
         // --- 2. LOGIC BRIDGE FOR INITIAL REDIRECTS ---
         if (data.MPI_QR_CODE) {
-            destination = "/uat-redirect/redirect-03.html";
+            destination = "/redirect/uat-redirect-03.html";
         } else if (data.MPI_REDIRECT_URL && data.MPI_REDIRECT_HTTP_DATA) {
-            destination = "/redirect/uat-redirect-01.html";
+            destination = "/redirect/redirect-01.html";
         } else if (data.MPI_REDIRECT_URL) {
-            destination = "/redirect/uat-redirect-02.html";
+            destination = "/redirect/redirect-02.html";
         }
 
 		// --- 3. RENDER UI OR REDIRECT ---
