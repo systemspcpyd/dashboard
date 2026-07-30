@@ -70,7 +70,7 @@ async function triggerInquiry() {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                "merchantId": "000000000000001",
+                "merchantId": "000000000000003",
                 "pubKey": PUBLICKEY,
                 "purchaseId": inqId
             })
@@ -79,7 +79,7 @@ async function triggerInquiry() {
         if (mkResult.errorCode !== "000") throw new Error("Key Exchange Failed");
 
         // Step B: RSA Sign
-        const rawData = "INQ" + "000000000000001" + inqId + originalTrxnId + ts + "458" + amount;
+        const rawData = "INQ" + "000000000000003" + inqId + originalTrxnId + ts + "458" + amount;
         const signature = await signData(rawData, PRIVATE_KEY_PEM);
         document.getElementById("INQ_MAC").value = signature;
 
