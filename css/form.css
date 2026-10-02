@@ -167,16 +167,8 @@ html, body {
 
 /* --- Dark Mode Container & Table Styles (Added from Test Card Reference) --- */
 
-/* Base body / background alignment if needed */
-body { 
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    line-height: 1.2; 
-    color: #e0e0e0; 
-    background-color: #121212; /* Dark theme background */
-}
-
-/* Headings inside your cards/containers */
-.card h2, .container h2, h2 { 
+/* Scoped headings specifically inside cards/containers to prevent overriding dashboard layout */
+.card h2, .container h2, .panel h2 { 
     font-size: 15px; 
     border-bottom: 2px solid #333; 
     padding-bottom: 5px; 
@@ -188,14 +180,14 @@ body {
 
 /* Fix for White Cards/Containers -> Convert to Dark Theme */
 .card, .container, .panel {
-    background-color: #1e1e1e !important; /* Forces dark background */
+    background-color: #1e1e1e !important; 
     color: #ffffff !important;
     border: 1px solid #333333;
     border-radius: 4px;
 }
 
-/* Table Styling for Dark Mode */
-table { 
+/* Specific Isolated Table Styling for Reference Cards (keeps #channel-table safe) */
+.test-card-table { 
     width: 100%;
     border-collapse: collapse; 
     background: #1e1e1e; 
@@ -205,7 +197,7 @@ table {
     border: 1px solid #333;
 }
 
-th, td { 
+.test-card-table th, .test-card-table td { 
     border: 1px solid #333; 
     padding: 10px; 
     text-align: left; 
@@ -215,7 +207,7 @@ th, td {
     color: #e0e0e0;
 }
 
-th { 
+.test-card-table th { 
     background-color: #252525; 
     color: #ffffff;
     font-size: 11px;
