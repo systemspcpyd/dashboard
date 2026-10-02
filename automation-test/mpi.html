@@ -103,7 +103,7 @@
 
  <script>
         const KEY_EXCHANGE_URL = "https://systemspc.vercel.app/api/key-exchange-uat";
-        const PAYMENT_REQUEST_URL = "https://devlink.paydee.co/mpi/mpReq";[cite: 1]
+        const PAYMENT_REQUEST_URL = "https://devlink.paydee.co/mpi/mpReq";
         const PUBLICKEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq8j2SHHfzMLlhYppnlk-QqjjjZwMkhK6s6rERd0JhhY_6-Md4Z0327uEdfNbJrSEPJVPT55gjRhx4MorEhrabuafuY8thSPS4epwkOjjPtELwZxViWe1dzG5TQakJ_i8ZOQuUYFJg02RcwUTzE3ty-x7mkwj9t2wAdRqTagyaDIAVMTxP_Y4AS76xjA3aH43Q0HKHGAxxIlXBIQxImuPhlUbPtVtTHIsUwkIx2BDh8kPZ3Mgr3Cyky0F-cHpEFSi3rPSSLD_FVHlJRW2cODVm8E-s98CURQYs1npzDztzZgZPnnb9K57CB2Z50Ve6qUV7z4-uHs3nehiMJHktIs7LQIDAQAB";
         const PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
         MIIEogIBAAKCAQEAq8j2SHHfzMLlhYppnlk+QqjjjZwMkhK6s6rERd0JhhY/6+Md
@@ -150,6 +150,7 @@
 
         function renderTable() {
             const tbody = document.querySelector("#testCasesTable tbody");
+            if (!tbody) return;
             tbody.innerHTML = "";
             testCases.forEach((tc, index) => {
                 tbody.innerHTML += `
@@ -157,7 +158,7 @@
                         <td><input type="checkbox" ${tc.active ? 'checked' : ''} onchange="toggleActive(${index}, this.checked)"></td>
                         <td>${tc.id}</td>
                         <td><b>${tc.type}</b></td>
-                        <td><button onclick="runSingleTest(${index})">Run Test</button></td>
+                        <td><button type="button" onclick="runSingleTest(${index})">Run Test</button></td>
                     </tr>
                 `;
             });
@@ -241,7 +242,6 @@
             let mpResult = { MPI_ERROR_CODE: "ERR", MPI_TRXN_ID: trxnId };
 
             try {
-                // 1. Auto send mkReq()
                 const mkResponse = await fetch(KEY_EXCHANGE_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -263,7 +263,6 @@
                     };
                 }
 
-                // 2. If mkReq success, auto send mpReq()
                 if (mkSuccess) {
                     const formData = new FormData(form);
                     const payload = new URLSearchParams();
@@ -343,22 +342,29 @@
                 let res = await executeTest(tc);
                 if (res.status) passedCount++;
 
-                document.getElementById(`row-${tc.id}`).outerHTML = `
-                    <tr>
-                        <td>${res.id}</td>
-                        <td>${res.type}</td>
-                        <td>${res.duration}</td>
-                        <td>${res.trxnId}</td>
-                        <td>${res.errorCode}</td>
-                        <td class="${res.status ? 'success' : 'fail'}">${res.status ? 'SUCCESS' : 'FAILED'}</td>
-                    </tr>
-                `;
+                let targetRow = document.getElementById(`row-${tc.id}`);
+                if (targetRow) {
+                    targetRow.outerHTML = `
+                        <tr>
+                            <td>${res.id}</td>
+                            <td>${res.type}</td>
+                            <td>${res.duration}</td>
+                            <td>${res.trxnId}</td>
+                            <td>${res.errorCode}</td>
+                            <td class="${res.status ? 'success' : 'fail'}">${res.status ? 'SUCCESS' : 'FAILED'}</td>
+                        </tr>
+                    `;
+                }
             }
 
             document.getElementById("summary").innerText = `Finished! Passed: ${passedCount} / ${activeCases.length}`;
         }
 
-        renderTable();
+        // Ensure table populates properly as soon as DOM loads
+        document.addEventListener("DOMContentLoaded", renderTable());
+        if (document.readyState === "complete" || document.readyState === "interactive") {
+            renderTable();
+        }
     </script>
 </body>
 </html>
