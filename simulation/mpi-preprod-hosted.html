@@ -15,7 +15,7 @@
 <body> 
     <div id="status-msg" class="loading-overlay">Initializing secure connection...</div>
 
-<div class="controls-container controls" id="main-ui">
+<div class="controls-container controls" id="payment-container">
     <h3>Secure Payment</h3>
     
     <form id="form" method="post" target="payment-frame">
@@ -25,9 +25,11 @@
             <input type="text" name="MPI_PURCH_DATE" id="MPI_PURCH_DATE">
             <input type="text" name="MPI_TRXN_ID" id="MPI_TRXN_ID">
             <input type="text" name="MPI_PURCH_CURR" id="MPI_PURCH_CURR" value="458">
+            <!-- Added missing MPI_RETURN_URL input field -->
+            <input type="hidden" name="MPI_RETURN_URL" id="MPI_RETURN_URL">
             <textarea name="MPI_MAC" id="MPI_MAC"></textarea>
         </div>
-		
+        
         <input type="number" id="display_amt" step="0.01" placeholder="Enter Amount (e.g. 1.50)">
         <input type="hidden" name="MPI_PURCH_AMT" id="MPI_PURCH_AMT">
         
@@ -35,15 +37,14 @@
     </form>
 </div>
 
-<iframe name="payment-frame" id="payment-frame"></iframe>
+<iframe name="payment-frame" id="payment-frame" style="display:none; width:100%; height:600px; border:none;"></iframe>
 
     <script>
         // --- CONFIGURATION ---
         const KEY_EXCHANGE_URL = "https://preprod.paydee.co/mpi/mkReq";
         const PAYMENT_REQUEST_URL = "https://preprod.paydee.co/mpi/mercReq";
         const PUBLICKEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq8j2SHHfzMLlhYppnlk-QqjjjZwMkhK6s6rERd0JhhY_6-Md4Z0327uEdfNbJrSEPJVPT55gjRhx4MorEhrabuafuY8thSPS4epwkOjjPtELwZxViWe1dzG5TQakJ_i8ZOQuUYFJg02RcwUTzE3ty-x7mkwj9t2wAdRqTagyaDIAVMTxP_Y4AS76xjA3aH43Q0HKHGAxxIlXBIQxImuPhlUbPtVtTHIsUwkIx2BDh8kPZ3Mgr3Cyky0F-cHpEFSi3rPSSLD_FVHlJRW2cODVm8E-s98CURQYs1npzDztzZgZPnnb9K57CB2Z50Ve6qUV7z4-uHs3nehiMJHktIs7LQIDAQAB";
-		const VERCEL_CALLBACK_URL = "https://systemspc.vercel.app/api/callback"
-
+        const VERCEL_CALLBACK_URL = "https://systemspc.vercel.app/api/callback";
         
         // PASTE YOUR PRIVATE KEY HERE (PKCS#8 format)
         const PRIVATE_KEY_PEM = `-----BEGIN PRIVATE KEY-----
@@ -75,8 +76,7 @@ SL+FRlqBUM8bvGHdPzXV8CLr5NlItcINVHiCO70UmTCNx7b0Ga3vFsVhG8h9VQZu
 BjUoANFzgScOUTPCSQACXQ==
 -----END PRIVATE KEY-----`;
 
-
-/**
+        /**
          * 1. RUN ON LOAD: Initialize and call mkReq
          */
         window.onload = async function() {
@@ -98,7 +98,7 @@ BjUoANFzgScOUTPCSQACXQ==
         }
 
         /**
-         * 2. KEY EXCHANGE (mkReq)
+         * 2. KEY EXCHANGE (mkReq) - Using text/plain to force POST without OPTIONS preflight
          */
         async function mkReq() {
             let MID = document.getElementById("MPI_MERC_ID").value;
@@ -107,7 +107,7 @@ BjUoANFzgScOUTPCSQACXQ==
             try {
                 const response = await fetch(KEY_EXCHANGE_URL, {
                     method: 'POST',
-                    headers: { "Content-Type": "application/json" },
+                    headers: { "Content-Type": "text/plain" }, // Bypasses browser CORS preflight (OPTIONS)
                     body: JSON.stringify({
                         "merchantId": MID,
                         "pubKey": PUBLICKEY,
@@ -117,13 +117,8 @@ BjUoANFzgScOUTPCSQACXQ==
                 const result = await response.json(); 
 
                 if (result.errorCode === "000") {
-                    // Success: Show the payment UI silently (no alert)
                     document.getElementById("status-msg").style.display = "none";
                     document.getElementById("payment-container").style.display = "block";
-                    // Also ensure checkout-box is visible if you are using that ID
-                    if(document.getElementById("checkout-box")) {
-                        document.getElementById("checkout-box").style.display = "block";
-                    }
                 } else {
                     document.getElementById("status-msg").innerText = "❌ Failed. Please refresh.";
                     alert(`Error: ${result.errorMessage}`);
@@ -160,7 +155,6 @@ BjUoANFzgScOUTPCSQACXQ==
                 document.getElementById("MPI_PURCH_AMT").value;
 
             try {
-                // Update button text as requested
                 payBtn.innerText = "Select Payment Method";
                 payBtn.disabled = true;
 
@@ -206,30 +200,26 @@ BjUoANFzgScOUTPCSQACXQ==
         }
 
         /**
-         * 5. MP REQ: Final Submission
+         * 5. MP REQ: Final Submission via standard POST Form
          */
         function mpReq() {
             const myForm = document.getElementById("form");
             const iframe = document.getElementById("payment-frame");
-            const checkoutBox = document.getElementById("checkout-box") || document.getElementById("payment-container");
+            const checkoutBox = document.getElementById("payment-container");
 
             // 1. Set the destination URL
             myForm.action = PAYMENT_REQUEST_URL;
             
-            // 2. Set the return URL
+            // 2. Set the return URL (now safely mapped to the newly added input)
             document.getElementById("MPI_RETURN_URL").value = VERCEL_CALLBACK_URL;
 
-            // 3. UI Transition: Hide the input box and show the gateway iframe
+            // 3. UI Transition: Hide input box and show the gateway iframe
             if (checkoutBox) checkoutBox.style.display = "none";
             if (iframe) iframe.style.display = "block";
 
-            // 4. Submit the signed data into the iframe
+            // 4. Submit the signed data into the iframe via standard POST
             myForm.submit();
         }
     </script>
 </body>
 </html>
-
-
-
-
