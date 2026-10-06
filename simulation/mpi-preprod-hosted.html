@@ -39,7 +39,7 @@
 
     <script>
         // --- CONFIGURATION ---
-        const KEY_EXCHANGE_URL = "https://preprod.paydee.co/mpi/mkReq";
+        const KEY_EXCHANGE_URL = "https://systemspc.vercel.app/api/key-exchange-preprod";
         const PAYMENT_REQUEST_URL = "https://preprod.paydee.co/mpi/mercReq";
         const PUBLICKEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq8j2SHHfzMLlhYppnlk-QqjjjZwMkhK6s6rERd0JhhY_6-Md4Z0327uEdfNbJrSEPJVPT55gjRhx4MorEhrabuafuY8thSPS4epwkOjjPtELwZxViWe1dzG5TQakJ_i8ZOQuUYFJg02RcwUTzE3ty-x7mkwj9t2wAdRqTagyaDIAVMTxP_Y4AS76xjA3aH43Q0HKHGAxxIlXBIQxImuPhlUbPtVtTHIsUwkIx2BDh8kPZ3Mgr3Cyky0F-cHpEFSi3rPSSLD_FVHlJRW2cODVm8E-s98CURQYs1npzDztzZgZPnnb9K57CB2Z50Ve6qUV7z4-uHs3nehiMJHktIs7LQIDAQAB";
         
@@ -95,7 +95,7 @@ BjUoANFzgScOUTPCSQACXQ==
         }
 
         /**
-         * 2. KEY EXCHANGE (mkReq) - Using text/plain to force POST without OPTIONS preflight
+         * 2. KEY EXCHANGE (mkReq) - Using Vercel backend proxy
          */
         async function mkReq() {
             let MID = document.getElementById("MPI_MERC_ID").value;
@@ -104,7 +104,7 @@ BjUoANFzgScOUTPCSQACXQ==
             try {
                 const response = await fetch(KEY_EXCHANGE_URL, {
                     method: 'POST',
-                    headers: { "Content-Type": "text/plain" }, // Bypasses browser CORS preflight (OPTIONS)
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         "merchantId": MID,
                         "pubKey": PUBLICKEY,
