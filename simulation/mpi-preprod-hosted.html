@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/form.css">
+    <title>Payment Page</title>
+    <style>
+        /* Hide everything by default until mkReq succeeds */
+        #payment-container { display: none; margin-top: 20px; }
+        .hidden-fields { display: none; }
+        .loading-overlay { margin: 20px; font-weight: bold; color: #555; }
+    </style>
+</head>
+<body> 
+    <div id="status-msg" class="loading-overlay">Initializing secure connection...</div>
+
+<div class="controls-container controls" id="main-ui">
+    <h3>Secure Payment</h3>
+    
+    <form id="form" method="post" target="payment-frame">
+        <div style="display:none;">
+            <input type="text" name="MPI_TRANS_TYPE" id="MPI_TRANS_TYPE"  value="SALES">
+            <input type="text" name="MPI_MERC_ID" id="MPI_MERC_ID" value="000000000000033">
+            <input type="text" name="MPI_PURCH_DATE" id="MPI_PURCH_DATE">
+            <input type="text" name="MPI_TRXN_ID" id="MPI_TRXN_ID">
+            <input type="text" name="MPI_PURCH_CURR" id="MPI_PURCH_CURR" value="458">
+            <textarea name="MPI_MAC" id="MPI_MAC"></textarea>
+        </div>
+		
+        <input type="number" id="display_amt" step="0.01" placeholder="Enter Amount (e.g. 1.50)">
+        <input type="hidden" name="MPI_PURCH_AMT" id="MPI_PURCH_AMT">
+        
+        <button type="button" id="pay-btn" onclick="handlePay()">Pay Now</button>
+    </form>
+</div>
+
+<iframe name="payment-frame" id="payment-frame"></iframe>
+
+    <script>
+        // --- CONFIGURATION ---
+        const KEY_EXCHANGE_URL = "https://preprod.paydee.co/mpi/mkReq";
+        const PAYMENT_REQUEST_URL = "https://preprod.paydee.co/mpi/mercReq";
+        const PUBLICKEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq8j2SHHfzMLlhYppnlk-QqjjjZwMkhK6s6rERd0JhhY_6-Md4Z0327uEdfNbJrSEPJVPT55gjRhx4MorEhrabuafuY8thSPS4epwkOjjPtELwZxViWe1dzG5TQakJ_i8ZOQuUYFJg02RcwUTzE3ty-x7mkwj9t2wAdRqTagyaDIAVMTxP_Y4AS76xjA3aH43Q0HKHGAxxIlXBIQxImuPhlUbPtVtTHIsUwkIx2BDh8kPZ3Mgr3Cyky0F-cHpEFSi3rPSSLD_FVHlJRW2cODVm8E-s98CURQYs1npzDztzZgZPnnb9K57CB2Z50Ve6qUV7z4-uHs3nehiMJHktIs7LQIDAQAB";
+		const VERCEL_CALLBACK_URL = "https://sys-int-nine.vercel.app/api/callback"
+
+        
+        // PASTE YOUR PRIVATE KEY HERE (PKCS#8 format)
+        const PRIVATE_KEY_PEM = `-----BEGIN PRIVATE KEY-----
+MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCryPZIcd/MwuWF
+immeWT5CqOONnAySErqzqsRF3QmGFj/r4x3hnTfbu4R181smtIQ8lU9PnmCNGHHg
+yisSGtpu5p+5jy2FI9Lh6nCQ6OM+0QvBnFWJZ7V3MblNBqQn+Lxk5C5RgUmDTZFz
+BRPMTe3L7HuaTCP23bAB1GpNqDJoMgBUxPE/9jgBLvrGMDdofjdDQcocYDHEiVcE
+hDEia4+GVRs+1W1McixTCQjHYEOHyQ9ncyCvcLKTLQX5wekQVKLes9JIsP8VUeUl
+FbZw4NWbwT6z3wJRFBizWenMPO3NmBk+edv0rnsIHZnnRV7qpRXvPj64ezed6GIw
+keS0izstAgMBAAECggEAC59vu8Fp/S6B8rHwPnoBopH5v3bmSisr6FnD/jQb3695
+XgpCVyWuMKxJzzngGh4kRP3B3Xxfl6b77Ckm69/W6qJTqULnjLa6nyAfw0uL4I//
++yFgOjPtomXCCKpL3gvQIgVm9YseqwcgXFy6FQcqxog2vrRVye9Vksdz9SgjAktP
+UeTaAgyfHGcKqQvWb8E0N5hpPfQMsw9p5vKdoSyrokb6mTSzMn2K9NlCtXNYvzyp
+gmivt5H4wYGHrl+GFJnKfbb0Qv0O3BUaRTbyuUXBwJqWGYIiAk7288rdAuiiZPgV
++iS4QKvG/RTCilg8FfJTJy/Mea9sVO3kVLwouB8xwwKBgQDCoopJ4C6hCkk7jHyE
+/t9hD3h7OhGQOVX1DkgJyAlbqCIxvNPZp2B3ae7FAjAtFf8/gPCHY7EKc6tfUUAz
+GZuz3/o4aCMeEoAAzSkijBkWzhWq79CUBnlR0/Md0a4DmhIQGFUzF7QvV1ZtCvRS
+mN6YfqA5+zAMViwhrAtc48j5OwKBgQDh8iZCoogGhgAZQ+41+OgrZlClFoUYAa69
++lLKWMxAOdgkm04ZNbxIjRAXN3fWydjHnI+8S+RHiURxU+Lq3oyR13gpWSaS12Mh
+DRk4CVsFpoRYXLqU3tPIg0nsEBgU7/UPdSPgaL07t1Xu/j0HOnm1U0WtSKEzXJ85
+1R8/eAIWtwKBgHxi2hPqZIJgi3q2BqIMLH/gHjRKYQ0Vx1xMGze9ElX0Np4oug8g
+S6MlHQXkpxs5Mp3H7m/oAy3VzFCnIWtG0136JvRDgSXn1swsUTyV4jbTz78lcdwX
+4xKrbHTDGv2MSjzlABYd8PZMT5xyYsAimCdGzWkgoY1QyPVf+QcNP9QfAoGACyZJ
+4QvoLno6UwTZImyv+ERKQntEAhVDLDjIERgkrB6unc/UIMZYDjR30M156m13dxIw
+vZf5IdaSPA1pqzFkOmYpldDCaIicaasdzXgYt8Spzzp0Mph0VvazlSSOK6pTq3ma
+VZ6Vh/baFLsTA+JM0zfSvmRRIBm3+cCclCM15y0CgYANc3IGearrmbVgyVZ74+0M
+SL+FRlqBUM8bvGHdPzXV8CLr5NlItcINVHiCO70UmTCNx7b0Ga3vFsVhG8h9VQZu
+68zG+AEkbgDYEbzCsVsgYMtASTlVgG9KQoqGeIKhKdUQliV+DKn2uLW8SBetfXwX
+BjUoANFzgScOUTPCSQACXQ==
+-----END PRIVATE KEY-----`;
+
+
+/**
+         * 1. RUN ON LOAD: Initialize and call mkReq
+         */
+        window.onload = async function() {
+            initFields();
+            await mkReq();
+        };
+
+        function initFields() {
+            let d = new Date();
+            let x = d.getFullYear() + 
+                    (d.getMonth() + 1).toString().padStart(2, '0') + 
+                    d.getDate().toString().padStart(2, '0') + 
+                    d.getHours().toString().padStart(2, '0') + 
+                    d.getMinutes().toString().padStart(2, '0') + 
+                    d.getSeconds().toString().padStart(2, '0');
+            
+            document.getElementById("MPI_PURCH_DATE").value = x;
+            document.getElementById("MPI_TRXN_ID").value = "PAGPRD" + x;
+        }
+
+        /**
+         * 2. KEY EXCHANGE (mkReq)
+         */
+        async function mkReq() {
+            let MID = document.getElementById("MPI_MERC_ID").value;
+            let transactionID = document.getElementById("MPI_TRXN_ID").value;
+
+            try {
+                const response = await fetch(KEY_EXCHANGE_URL, {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        "merchantId": MID,
+                        "pubKey": PUBLICKEY,
+                        "purchaseId": transactionID
+                    })
+                });
+                const result = await response.json(); 
+
+                if (result.errorCode === "000") {
+                    // Success: Show the payment UI silently (no alert)
+                    document.getElementById("status-msg").style.display = "none";
+                    document.getElementById("payment-container").style.display = "block";
+                    // Also ensure checkout-box is visible if you are using that ID
+                    if(document.getElementById("checkout-box")) {
+                        document.getElementById("checkout-box").style.display = "block";
+                    }
+                } else {
+                    document.getElementById("status-msg").innerText = "❌ Failed. Please refresh.";
+                    alert(`Error: ${result.errorMessage}`);
+                }
+            } catch (error) {
+                document.getElementById("status-msg").innerText = "⚠️ Connection Error";
+                console.error(error);
+            }
+        }
+
+        /**
+         * 3. HANDLE PAY: Amount conversion -> Signing -> Submit
+         */
+        async function handlePay() {
+            const displayAmt = document.getElementById("display_amt").value;
+            if (!displayAmt || displayAmt <= 0) {
+                alert("Please enter a valid amount");
+                return;
+            }
+
+            const payBtn = document.getElementById("pay-btn");
+
+            // Convert 1.50 to 150 (multiply by 100)
+            const gatewayAmt = Math.round(parseFloat(displayAmt) * 100);
+            document.getElementById("MPI_PURCH_AMT").value = gatewayAmt;
+
+            // Generate the string to be signed (Clear MAC)
+            const rawData = 
+                document.getElementById("MPI_TRANS_TYPE").value + 
+                document.getElementById("MPI_MERC_ID").value + 
+                document.getElementById("MPI_TRXN_ID").value +
+                document.getElementById("MPI_PURCH_DATE").value +
+                document.getElementById("MPI_PURCH_CURR").value +
+                document.getElementById("MPI_PURCH_AMT").value;
+
+            try {
+                // Update button text as requested
+                payBtn.innerText = "Select Payment Method";
+                payBtn.disabled = true;
+
+                // Sign the data
+                const signature = await signData(rawData, PRIVATE_KEY_PEM);
+                document.getElementById("MPI_MAC").value = signature;
+
+                // Submit to Gateway
+                mpReq();
+            } catch (err) {
+                console.error(err);
+                alert("Signing Error: Check console for details.");
+                payBtn.innerText = "Pay Now";
+                payBtn.disabled = false;
+            }
+        }
+
+        /**
+         * 4. CRYPTO: RSA Signing (SHA256withRSA + Base64URL)
+         */
+        async function signData(message, pem) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(message);
+
+            const binaryKey = pemToArrayBuffer(pem);
+            const privateKey = await window.crypto.subtle.importKey(
+                "pkcs8",
+                binaryKey,
+                { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+                false,
+                ["sign"]
+            );
+
+            const signature = await window.crypto.subtle.sign("RSASSA-PKCS1-v1_5", privateKey, data);
+
+            return btoa(String.fromCharCode(...new Uint8Array(signature)))
+                .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        function pemToArrayBuffer(pem) {
+            const b64 = pem.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\n|\r/g, '');
+            return Uint8Array.from(atob(b64), c => c.charCodeAt(0)).buffer;
+        }
+
+        /**
+         * 5. MP REQ: Final Submission
+         */
+        function mpReq() {
+            const myForm = document.getElementById("form");
+            const iframe = document.getElementById("payment-frame");
+            const checkoutBox = document.getElementById("checkout-box") || document.getElementById("payment-container");
+
+            // 1. Set the destination URL
+            myForm.action = PAYMENT_REQUEST_URL;
+            
+            // 2. Set the return URL
+            document.getElementById("MPI_RETURN_URL").value = VERCEL_CALLBACK_URL;
+
+            // 3. UI Transition: Hide the input box and show the gateway iframe
+            if (checkoutBox) checkoutBox.style.display = "none";
+            if (iframe) iframe.style.display = "block";
+
+            // 4. Submit the signed data into the iframe
+            myForm.submit();
+        }
+    </script>
+</body>
+</html>
+
+
+
+
