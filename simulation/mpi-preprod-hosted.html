@@ -25,8 +25,6 @@
             <input type="text" name="MPI_PURCH_DATE" id="MPI_PURCH_DATE">
             <input type="text" name="MPI_TRXN_ID" id="MPI_TRXN_ID">
             <input type="text" name="MPI_PURCH_CURR" id="MPI_PURCH_CURR" value="458">
-            <!-- Added missing MPI_RETURN_URL input field -->
-            <input type="hidden" name="MPI_RETURN_URL" id="MPI_RETURN_URL">
             <textarea name="MPI_MAC" id="MPI_MAC"></textarea>
         </div>
         
@@ -44,7 +42,6 @@
         const KEY_EXCHANGE_URL = "https://preprod.paydee.co/mpi/mkReq";
         const PAYMENT_REQUEST_URL = "https://preprod.paydee.co/mpi/mercReq";
         const PUBLICKEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq8j2SHHfzMLlhYppnlk-QqjjjZwMkhK6s6rERd0JhhY_6-Md4Z0327uEdfNbJrSEPJVPT55gjRhx4MorEhrabuafuY8thSPS4epwkOjjPtELwZxViWe1dzG5TQakJ_i8ZOQuUYFJg02RcwUTzE3ty-x7mkwj9t2wAdRqTagyaDIAVMTxP_Y4AS76xjA3aH43Q0HKHGAxxIlXBIQxImuPhlUbPtVtTHIsUwkIx2BDh8kPZ3Mgr3Cyky0F-cHpEFSi3rPSSLD_FVHlJRW2cODVm8E-s98CURQYs1npzDztzZgZPnnb9K57CB2Z50Ve6qUV7z4-uHs3nehiMJHktIs7LQIDAQAB";
-        const VERCEL_CALLBACK_URL = "https://systemspc.vercel.app/api/callback";
         
         // PASTE YOUR PRIVATE KEY HERE (PKCS#8 format)
         const PRIVATE_KEY_PEM = `-----BEGIN PRIVATE KEY-----
@@ -209,15 +206,12 @@ BjUoANFzgScOUTPCSQACXQ==
 
             // 1. Set the destination URL
             myForm.action = PAYMENT_REQUEST_URL;
-            
-            // 2. Set the return URL (now safely mapped to the newly added input)
-            document.getElementById("MPI_RETURN_URL").value = VERCEL_CALLBACK_URL;
 
-            // 3. UI Transition: Hide input box and show the gateway iframe
+            // 2. UI Transition: Hide input box and show the gateway iframe
             if (checkoutBox) checkoutBox.style.display = "none";
             if (iframe) iframe.style.display = "block";
 
-            // 4. Submit the signed data into the iframe via standard POST
+            // 3. Submit the signed data into the iframe via standard POST
             myForm.submit();
         }
     </script>
