@@ -1,4 +1,6 @@
 export default async function handler(req, res) {
+  // Bypass expired SSL certificate on PayDee preprod server
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
   // --- CORS HEADERS (must be first, always set) ---
   res.setHeader('Access-Control-Allow-Origin', '*'); // tighten later if needed
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
