@@ -59,6 +59,7 @@ async function triggerInquiry() {
     const inqId = "INQ" + ts;
 
     // 3. Map to Hidden Form
+    document.getElementById("INQ_MERC_ID").value = mid;
     document.getElementById("INQ_PURCH_DATE").value = ts;
     document.getElementById("INQ_TRXN_ID").value = inqId;
     document.getElementById("INQ_ORI_TRXN_ID").value = originalTrxnId;
