@@ -83,27 +83,26 @@
       <option value="N3D_RECURR">N3D_RECURR</option> 
 	  <option value="RFN3DRECUR">RFN3DRECUR</option> 
     </select>
-    <input type="text" name="MPI_MERC_ID" id="MPI_MERC_ID" value="000000000000033">
-    <input type="text" name="MPI_PAN" id="MPI_PAN" value="4100000000000100">
-    <input type="text" name="MPI_PAN_EXP" id="MPI_PAN_EXP" value="3012">
-    <input type="text" name="MPI_CVV2" id="MPI_CVV2" value="123">
-    <input type="text" name="MPI_CARD_HOLDER_NAME" id="MPI_CARD_HOLDER_NAME" value="TEST DOE">
-    <input type="text" name="MPI_PURCH_DATE" id="MPI_PURCH_DATE">
-    <input type="text" name="MPI_TRXN_ID" id="MPI_TRXN_ID">
-    <input type="text" name="MPI_ORI_TRXN_ID" id="MPI_ORI_TRXN_ID" value="">
-    <input type="text" name="MPI_PURCH_CURR" id="MPI_PURCH_CURR" value="458">
-    <input type="text" name="MPI_PURCH_AMT" id="MPI_PURCH_AMT" value="200">
+    <input type="text" name="MPI_MERC_ID" value="000000000000033">
+    <input type="text" name="MPI_PAN" value="4100000000000100">
+    <input type="text" name="MPI_PAN_EXP" value="3012">
+    <input type="text" name="MPI_CVV2" value="123">
+    <input type="text" name="MPI_CARD_HOLDER_NAME" value="TEST DOE">
+    <input type="text" name="MPI_PURCH_DATE">
+    <input type="text" name="MPI_TRXN_ID">
+    <input type="text" name="MPI_ORI_TRXN_ID" value="">
+    <input type="text" name="MPI_PURCH_CURR" value="458">
+    <input type="text" name="MPI_PURCH_AMT" value="200">
     <select name="MPI_ADDITIONAL_INFO_IND" id="MPI_ADDITIONAL_INFO_IND">
         <option value=""></option>
         <option value="Y">Y</option>
     </select>
-    <input type="text" name="MPI_EMAIL" id="MPI_EMAIL" value="systemspc@paydee.co">
-    <input type="text" name="MPI_MOBILE_PHONE_CC" id="MPI_MOBILE_PHONE_CC" value="60">     
-    <input type="text" name="MPI_MOBILE_PHONE" id="MPI_MOBILE_PHONE" value="123456789">     
-    <input type="text" name="MPI_RECURR_FREQ" id="MPI_RECURR_FREQ" value="">
-    <input type="text" name="MPI_RECURR_EXPIRY" id="MPI_RECURR_EXPIRY" value="">
-    <textarea name="MPI_MAC" id="MPI_MAC"></textarea>
-    <input type="hidden" name="MPI_RESPONSE_TYPE" id="MPI_RESPONSE_TYPE" value='JSON'>
+    <input type="text" name="MPI_EMAIL" value="systemspc@paydee.co">
+    <input type="text" name="MPI_MOBILE_PHONE_CC" value="60">     
+    <input type="text" name="MPI_MOBILE_PHONE" value="123456789">     
+    <input type="text" name="MPI_RECURR_FREQ" value="">
+    <input type="text" name="MPI_RECURR_EXPIRY" value="">
+    <textarea name="MPI_MAC"></textarea>
  </form>
 </div>
 
@@ -201,7 +200,7 @@
                     d.getSeconds().toString().padStart(2, '0');
             
             document.forms["form"]["MPI_PURCH_DATE"].value = x;
-            document.forms["form"]["MPI_TRXN_ID"].value = "MPIUAT" + x;
+            document.forms["form"]["MPI_TRXN_ID"].value = "MPIOTO" + x;
         }
 
         async function mkReq(mid, trxnId) {
@@ -281,25 +280,24 @@
                     };
                 }
 
-                // 2. Generate MAC for Payload
+                // 2. Generate MAC for Payload with all fields intact
                 generateMacForForm();
 
-                // 3. Handle empty fields precisely like manual test script
+                // 3. Disable empty fields just like your manual script before building URLSearchParams
                 const inputs = form.querySelectorAll('input, select, textarea');
                 inputs.forEach(input => {
-                    if (input.name !== "MPI_RESPONSE_TYPE" && !input.value.trim()) {
+                    if (!input.value.trim()) {
                         input.disabled = true;
                     }
                 });
 
-                // 4. Submit via Fetch to get JSON response (matching your manual CASE B)
                 const formData = new FormData(form);
                 const payload = new URLSearchParams();
                 formData.forEach((value, key) => {
                     if (value.trim() !== "") payload.append(key, value);
                 });
 
-                // Re-enable form inputs immediately after building payload
+                // Re-enable form inputs immediately after payload generation
                 inputs.forEach(input => input.disabled = false);
 
                 const mpResponse = await fetch(PAYMENT_REQUEST_URL, {
