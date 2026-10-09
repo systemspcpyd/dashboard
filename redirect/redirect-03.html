@@ -68,7 +68,7 @@
             const params = new URLSearchParams(window.location.search);
             const qr = params.get('MPI_QR_CODE');
             const expiry = params.get('MPI_QR_EXPIRY_SECONDS');
-            const mid = params.get('MPI_MERC_ID');
+            const merc_id = params.get('MPI_MERC_ID');
             const tid = params.get('MPI_TRXN_ID') || params.get('MPI_TXN_ID');
             const amt = params.get('MPI_PURCH_AMT');
 
