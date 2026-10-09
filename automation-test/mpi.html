@@ -70,7 +70,7 @@
  <form id="form" method="post" action="">
     <input type="text" name="MPI_TRANS_TYPE" id="MPI_TRANS_TYPE" value="SALES">
     <input type="text" name="MPI_MERC_ID" id="MPI_MERC_ID" value="000000000000033">
-    <input type="text" name="MPI_PAN" id="MPI_PAN" value="4100000000005000">
+    <input type="text" name="MPI_PAN" id="MPI_PAN" value="4100000000000100">
     <input type="text" name="MPI_PAN_EXP" id="MPI_PAN_EXP" value="3012">
     <input type="text" name="MPI_CVV2" id="MPI_CVV2" value="123">
     <input type="text" name="MPI_CARD_HOLDER_NAME" id="MPI_CARD_HOLDER_NAME" value="TEST DOE">
@@ -258,12 +258,23 @@ BjUoANFzgScOUTPCSQACXQ==
 
                 // 2. If mkReq is successful, build raw data string and sign for mpReq
                 const rawData = 
-                    document.getElementById("MPI_TRANS_TYPE").value + 
-                    document.getElementById("MPI_MERC_ID").value + 
-                    document.getElementById("MPI_TRXN_ID").value +
-                    document.getElementById("MPI_PURCH_DATE").value +
-                    document.getElementById("MPI_PURCH_CURR").value +
-                    document.getElementById("MPI_PURCH_AMT").value;
+                document.forms["form"]["MPI_TRANS_TYPE"].value +
+                document.forms["form"]["MPI_MERC_ID"].value +
+                document.forms["form"]["MPI_PAN"].value +
+                document.forms["form"]["MPI_CARD_HOLDER_NAME"].value +
+                document.forms["form"]["MPI_PAN_EXP"].value +
+                document.forms["form"]["MPI_CVV2"].value +
+                document.forms["form"]["MPI_TRXN_ID"].value +
+                document.forms["form"]["MPI_ORI_TRXN_ID"].value +
+                document.forms["form"]["MPI_PURCH_DATE"].value +
+                document.forms["form"]["MPI_PURCH_CURR"].value +
+                document.forms["form"]["MPI_PURCH_AMT"].value +
+                document.forms["form"]["MPI_EMAIL"].value +
+                document.forms["form"]["MPI_MOBILE_PHONE"].value +
+                document.forms["form"]["MPI_MOBILE_PHONE_CC"].value +
+                document.forms["form"]["MPI_ADDITIONAL_INFO_IND"].value+
+                document.forms["form"]["MPI_RECURR_FREQ"].value+
+                document.forms["form"]["MPI_RECURR_EXPIRY"].value;
 
                 const signature = await signData(rawData, PRIVATE_KEY_PEM);
                 document.getElementById("MPI_MAC").value = signature;
