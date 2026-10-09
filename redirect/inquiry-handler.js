@@ -57,7 +57,7 @@ async function triggerInquiry() {
                d.getMinutes().toString().padStart(2, '0') + d.getSeconds().toString().padStart(2, '0');
     
     const inqId = "INQ" + ts;
-
+    const mid = document.getElementById('merc_id').value.trim();
     // 3. Map to Hidden Form
     document.getElementById("INQ_MERC_ID").value = mid;
     document.getElementById("INQ_PURCH_DATE").value = ts;
