@@ -242,7 +242,7 @@ BjUoANFzgScOUTPCSQACXQ==
             let mpResult = { MPI_ERROR_CODE: "ERR", MPI_TRXN_ID: trxnId };
 
             try {
-                // 1. Trigger mkReq first for the test case
+                // 1. Trigger mkReq first for the specific test case execution
                 let mkRes = await mkReq(mid, trxnId);
                 if (!mkRes || mkRes.errorCode !== "000") {
                     let endTime = performance.now();
@@ -256,25 +256,25 @@ BjUoANFzgScOUTPCSQACXQ==
                     };
                 }
 
-                // 2. If mkReq is successful, build raw data string and sign for mpReq
+                // 2. Build raw data string using your exact fields sequence
                 const rawData = 
-                document.forms["form"]["MPI_TRANS_TYPE"].value +
-                document.forms["form"]["MPI_MERC_ID"].value +
-                document.forms["form"]["MPI_PAN"].value +
-                document.forms["form"]["MPI_CARD_HOLDER_NAME"].value +
-                document.forms["form"]["MPI_PAN_EXP"].value +
-                document.forms["form"]["MPI_CVV2"].value +
-                document.forms["form"]["MPI_TRXN_ID"].value +
-                document.forms["form"]["MPI_ORI_TRXN_ID"].value +
-                document.forms["form"]["MPI_PURCH_DATE"].value +
-                document.forms["form"]["MPI_PURCH_CURR"].value +
-                document.forms["form"]["MPI_PURCH_AMT"].value +
-                document.forms["form"]["MPI_EMAIL"].value +
-                document.forms["form"]["MPI_MOBILE_PHONE"].value +
-                document.forms["form"]["MPI_MOBILE_PHONE_CC"].value +
-                document.forms["form"]["MPI_ADDITIONAL_INFO_IND"].value+
-                document.forms["form"]["MPI_RECURR_FREQ"].value+
-                document.forms["form"]["MPI_RECURR_EXPIRY"].value;
+                    document.forms["form"]["MPI_TRANS_TYPE"].value +
+                    document.forms["form"]["MPI_MERC_ID"].value +
+                    document.forms["form"]["MPI_PAN"].value +
+                    document.forms["form"]["MPI_CARD_HOLDER_NAME"].value +
+                    document.forms["form"]["MPI_PAN_EXP"].value +
+                    document.forms["form"]["MPI_CVV2"].value +
+                    document.forms["form"]["MPI_TRXN_ID"].value +
+                    document.forms["form"]["MPI_ORI_TRXN_ID"].value +
+                    document.forms["form"]["MPI_PURCH_DATE"].value +
+                    document.forms["form"]["MPI_PURCH_CURR"].value +
+                    document.forms["form"]["MPI_PURCH_AMT"].value +
+                    document.forms["form"]["MPI_EMAIL"].value +
+                    document.forms["form"]["MPI_MOBILE_PHONE"].value +
+                    document.forms["form"]["MPI_MOBILE_PHONE_CC"].value +
+                    document.forms["form"]["MPI_ADDITIONAL_INFO_IND"].value +
+                    document.forms["form"]["MPI_RECURR_FREQ"].value +
+                    document.forms["form"]["MPI_RECURR_EXPIRY"].value;
 
                 const signature = await signData(rawData, PRIVATE_KEY_PEM);
                 document.getElementById("MPI_MAC").value = signature;
