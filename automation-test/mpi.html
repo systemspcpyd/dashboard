@@ -243,9 +243,9 @@
                 form["MPI_RECURR_EXPIRY"].value;
         
             try {
-                const CLEAN_KEY = PRIVATE_KEY.replace(/^[ \t]+/gm, '');
+                let rsaKey = KEYUTIL.getKey(PRIVATE_KEY);
                 let sig = new KJUR.crypto.Signature({"alg": "SHA256withRSA"});
-                sig.init(CLEAN_KEY); 
+                sig.init(rsaKey); 
                 sig.updateString(rawString);
                 let sigValueHex = sig.sign();
                 let base64Value = hextob64(sigValueHex);
