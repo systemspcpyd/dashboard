@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../css/form.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.27/jsrsasign-all-min.js"></script>
     <title>MPI Test Automation Dashboard</title>
     <style>
         .container { display: flex; gap: 20px; margin-top: 20px; padding: 20px; }
@@ -68,7 +69,20 @@
 <!-- Hidden form containing payload data fields -->
 <div style="display:none;">
  <form id="form" method="post" action="">
-    <input type="text" name="MPI_TRANS_TYPE" id="MPI_TRANS_TYPE" value="SALES">
+    <select name="MPI_TRANS_TYPE" id="MPI_TRANS_TYPE">
+      <option value="SALES">SALES</option>
+      <option value="INITRECURR">INITRECURR</option>
+      <option value="PRERECURR">PRERECURR</option>
+	  <option value="RECURR">RECURR</option>
+      <option value="INQ">INQ</option>
+      <option value="VSALES">VSALES</option>
+      <option value="REFUND">REFUND</option>
+      <option value="PREAUTH">PREAUTH</option>
+      <option value="SALESCOMPL">SALESCOMPL</option>
+      <option value="TERMINATE">TERMINATE</option> 
+      <option value="N3D_RECURR">N3D_RECURR</option> 
+	  <option value="RFN3DRECUR">RFN3DRECUR</option> 
+    </select>
     <input type="text" name="MPI_MERC_ID" id="MPI_MERC_ID" value="000000000000033">
     <input type="text" name="MPI_PAN" id="MPI_PAN" value="4100000000000100">
     <input type="text" name="MPI_PAN_EXP" id="MPI_PAN_EXP" value="3012">
@@ -79,13 +93,17 @@
     <input type="text" name="MPI_ORI_TRXN_ID" id="MPI_ORI_TRXN_ID" value="">
     <input type="text" name="MPI_PURCH_CURR" id="MPI_PURCH_CURR" value="458">
     <input type="text" name="MPI_PURCH_AMT" id="MPI_PURCH_AMT" value="200">
-    <input type="text" name="MPI_ADDITIONAL_INFO_IND" id="MPI_ADDITIONAL_INFO_IND" value="">
+    <select name="MPI_ADDITIONAL_INFO_IND" id="MPI_ADDITIONAL_INFO_IND">
+        <option value=""></option>
+        <option value="Y">Y</option>
+    </select>
     <input type="text" name="MPI_EMAIL" id="MPI_EMAIL" value="systemspc@paydee.co">
     <input type="text" name="MPI_MOBILE_PHONE_CC" id="MPI_MOBILE_PHONE_CC" value="60">     
     <input type="text" name="MPI_MOBILE_PHONE" id="MPI_MOBILE_PHONE" value="123456789">     
     <input type="text" name="MPI_RECURR_FREQ" id="MPI_RECURR_FREQ" value="">
     <input type="text" name="MPI_RECURR_EXPIRY" id="MPI_RECURR_EXPIRY" value="">
     <textarea name="MPI_MAC" id="MPI_MAC"></textarea>
+    <input type="hidden" name="MPI_RESPONSE_TYPE" id="MPI_RESPONSE_TYPE" value='JSON'>
  </form>
 </div>
 
@@ -93,35 +111,33 @@
         const KEY_EXCHANGE_URL = "https://systemspc.vercel.app/api/key-exchange-uat";
         const PAYMENT_REQUEST_URL = "https://devlink.paydee.co/mpi/mpReq";
         const PUBLICKEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq8j2SHHfzMLlhYppnlk-QqjjjZwMkhK6s6rERd0JhhY_6-Md4Z0327uEdfNbJrSEPJVPT55gjRhx4MorEhrabuafuY8thSPS4epwkOjjPtELwZxViWe1dzG5TQakJ_i8ZOQuUYFJg02RcwUTzE3ty-x7mkwj9t2wAdRqTagyaDIAVMTxP_Y4AS76xjA3aH43Q0HKHGAxxIlXBIQxImuPhlUbPtVtTHIsUwkIx2BDh8kPZ3Mgr3Cyky0F-cHpEFSi3rPSSLD_FVHlJRW2cODVm8E-s98CURQYs1npzDztzZgZPnnb9K57CB2Z50Ve6qUV7z4-uHs3nehiMJHktIs7LQIDAQAB";
-        
-        const PRIVATE_KEY_PEM = `-----BEGIN PRIVATE KEY-----
-MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCryPZIcd/MwuWF
-immeWT5CqOONnAySErqzqsRF3QmGFj/r4x3hnTfbu4R181smtIQ8lU9PnmCNGHHg
-yisSGtpu5p+5jy2FI9Lh6nCQ6OM+0QvBnFWJZ7V3MblNBqQn+Lxk5C5RgUmDTZFz
-BRPMTe3L7HuaTCP23bAB1GpNqDJoMgBUxPE/9jgBLvrGMDdofjdDQcocYDHEiVcE
-hDEia4+GVRs+1W1McixTCQjHYEOHyQ9ncyCvcLKTLQX5wekQVKLes9JIsP8VUeUl
-FbZw4NWbwT6z3wJRFBizWenMPO3NmBk+edv0rnsIHZnnRV7qpRXvPj64ezed6GIw
-keS0izstAgMBAAECggEAC59vu8Fp/S6B8rHwPnoBopH5v3bmSisr6FnD/jQb3695
-XgpCVyWuMKxJzzngGh4kRP3B3Xxfl6b77Ckm69/W6qJTqULnjLa6nyAfw0uL4I//
-+yFgOjPtomXCCKpL3gvQIgVm9YseqwcgXFy6FQcqxog2vrRVye9Vksdz9SgjAktP
-UeTaAgyfHGcKqQvWb8E0N5hpPfQMsw9p5vKdoSyrokb6mTSzMn2K9NlCtXNYvzyp
-gmivt5H4wYGHrl+GFJnKfbb0Qv0O3BUaRTbyuUXBwJqWGYIiAk7288rdAuiiZPgV
-+iS4QKvG/RTCilg8FfJTJy/Mea9sVO3kVLwouB8xwwKBgQDCoopJ4C6hCkk7jHyE
-/t9hD3h7OhGQOVX1DkgJyAlbqCIxvNPZp2B3ae7FAjAtFf8/gPCHY7EKc6tfUUAz
-GZuz3/o4aCMeEoAAzSkijBkWzhWq79CUBnlR0/Md0a4DmhIQGFUzF7QvV1ZtCvRS
-mN6YfqA5+zAMViwhrAtc48j5OwKBgQDh8iZCoogGhgAZQ+41+OgrZlClFoUYAa69
-+lLKWMxAOdgkm04ZNbxIjRAXN3fWydjHnI+8S+RHiURxU+Lq3oyR13gpWSaS12Mh
-DRk4CVsFpoRYXLqU3tPIg0nsEBgU7/UPdSPgaL07t1Xu/j0HOnm1U0WtSKEzXJ85
-1R8/eAIWtwKBgHxi2hPqZIJgi3q2BqIMLH/gHjRKYQ0Vx1xMGze9ElX0Np4oug8g
-S6MlHQXkpxs5Mp3H7m/oAy3VzFCnIWtG0136JvRDgSXn1swsUTyV4jbTz78lcdwX
-4xKrbHTDGv2MSjzlABYd8PZMT5xyYsAimCdGzWkgoY1QyPVf+QcNP9QfAoGACyZJ
-4QvoLno6UwTZImyv+ERKQntEAhVDLDjIERgkrB6unc/UIMZYDjR30M156m13dxIw
-vZf5IdaSPA1pqzFkOmYpldDCaIicaasdzXgYt8Spzzp0Mph0VvazlSSOK6pTq3ma
-VZ6Vh/baFLsTA+JM0zfSvmRRIBm3+cCclCM15y0CgYANc3IGearrmbVgyVZ74+0M
-SL+FRlqBUM8bvGHdPzXV8CLr5NlItcINVHiCO70UmTCNx7b0Ga3vFsVhG8h9VQZu
-68zG+AEkbgDYEbzCsVsgYMtASTlVgG9KQoqGeIKhKdUQliV+DKn2uLW8SBetfXwX
-BjUoANFzgScOUTPCSQACXQ==
------END PRIVATE KEY-----`;
+        const PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
+        MIIEogIBAAKCAQEAq8j2SHHfzMLlhYppnlk+QqjjjZwMkhK6s6rERd0JhhY/6+Md
+        4Z0327uEdfNbJrSEPJVPT55gjRhx4MorEhrabuafuY8thSPS4epwkOjjPtELwZxV
+        iWe1dzG5TQakJ/i8ZOQuUYFJg02RcwUTzE3ty-x7mkwj9t2wAdRqTagyaDIAVMTx
+        P/Y4AS76xjA3aH43Q0HKHGAxxIlXBIQxImuPhlUbPtVtTHIsUwkIx2BDh8kPZ3Mg
+        r3Cyky0F+cHpEFSi3rPSSLD/FVHlJRW2cODVm8E-s98CURQYs1npzDztzZgZPnnb
+        9K57CB2Z50Ve6qUV7z4+uHs3nehiMJHktIs7LQIDAQABAoIBAAufb7vBaf0ugfKx
+        8D56AaKR+b925korK+hZw/40G9+veV4KQlclrjCsSc854BoeJET9wd18X5em++wp
+        Juvf1uqiU6lC54y2up8gH8NLi+CP//shYDoz7aJlwgiqS94L0CIFZvWLHqsHIFxc
+        uhUHKsaINr60VcnvVZLHc/UoIwJLT1Hk2gIMnxxnCqkL1m/BNDeYaT30DLMPaeby
+        naEsq6JG+pk0szJ9ivTZQrVzWL88qYJor7eR+MGBh65fhhSZyn229EL9DtwVGkU2
+        8rlFwcCalhmCIgJO9vPK3QLoomT4FfokuECrxv0UwopYPBXyUycvzHmvbFTt5FS8
+        KLgfMcMCgYEAwqKKSeAuoQpJO4x8hP7fYQ94ezoRkDlV9Q5ICcgJW6giMbzT2adg
+        d2nuxQIwLRX/P4Dwh2OxCnOrX1FAMxmbs9/6OGgjHhKAAM0pIowZFs4Vqu/QlAZ5
+        UdPzHdGuA5oSEBhVMxe0L1dWbQr0UpjemH6gOfswDFYsIawLXOPI+TsCgYEA4fIm
+        QqKIBoYAGUPuNfjoK2ZQpRaFGAGuvfpSyljMQDnYJJtOGTW8SI0QFzd31snYx5yP
+        vEvkR4lEcVPi6t6Mkdd4KVkmktdjIQ0ZOAlbBaaEWFy6lN7TyINJ7BAYFO/1D3Uj
+        4Gi9O7dV7v49Bzp5tVNFrUihM1yfOdUfP3gCFrcCgYB8YtoT6mSCYIt6tgaiDCx/
+        4B40SmENFcdcTBs3vRJV9DaeKLoPIEujJR0F5KcbOTKdx+5v6AMt1cxQpyFrRtNd
+        +ib0Q4El59bMLFE8leI208+/JXHcF+MSq2x0wxr9jEo85QAWHfD2TE+ccmLAIpgn
+        Rs1pIKGNUMj1X/kHDT/UHwKBgAsmSeEL6C56OlME2SJsr/hESkJ7RAIVQyw4yBEY
+        JKwerp3P1CDGWA40d9DNeeptd3cSML2X+SHWkjwNaasxZDpmKZXQwmiInGmrHc14
+        GLfEqc86dDKYdFb2s5UkjiuqU6t5mlWelYf22hS7EwPiTNM30r5kUSAZt/nAnJQj
+        NectAoGADXNyBnmq65m1YMlWe+PtDEi/hUZagVDPG7xh3T811fAi6+TZSLXCDVR4
+        gju9FJkwjce29Bmt7xbFYRvIfVUGbuvMxvgBJG4A2BG8wrFbIGDLQEk5VYBvSkKK
+        hniCoSnVEJYlfgyp9ri1vEgXrX18FwY1KADRc4EnDlEzwkkAAl0=
+        -----END RSA PRIVATE KEY-----`;
 
         const defaultTestCases = [
             { id: 1, active: true, type: "SALES" },
@@ -184,8 +200,8 @@ BjUoANFzgScOUTPCSQACXQ==
                     d.getMinutes().toString().padStart(2, '0') + 
                     d.getSeconds().toString().padStart(2, '0');
             
-            document.getElementById("MPI_PURCH_DATE").value = x;
-            document.getElementById("MPI_TRXN_ID").value = "MPIOTO" + x;
+            document.forms["form"]["MPI_PURCH_DATE"].value = x;
+            document.forms["form"]["MPI_TRXN_ID"].value = "MPIUAT" + x;
         }
 
         async function mkReq(mid, trxnId) {
@@ -206,43 +222,52 @@ BjUoANFzgScOUTPCSQACXQ==
             }
         }
 
-        async function signData(message, pem) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(message);
-
-            const binaryKey = pemToArrayBuffer(pem);
-            const privateKey = await window.crypto.subtle.importKey(
-                "pkcs8",
-                binaryKey,
-                { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-                false,
-                ["sign"]
-            );
-
-            const signature = await window.crypto.subtle.sign("RSASSA-PKCS1-v1_5", privateKey, data);
-
-            return btoa(String.fromCharCode(...new Uint8Array(signature)))
-                .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-        }
-
-        function pemToArrayBuffer(pem) {
-            const b64 = pem.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\n|\r/g, '');
-            return Uint8Array.from(atob(b64), c => c.charCodeAt(0)).buffer;
+        function generateMacForForm() {
+            let form = document.forms["form"];
+            let rawString = 
+                form["MPI_TRANS_TYPE"].value +
+                form["MPI_MERC_ID"].value +
+                form["MPI_PAN"].value +
+                form["MPI_CARD_HOLDER_NAME"].value +
+                form["MPI_PAN_EXP"].value +
+                form["MPI_CVV2"].value +
+                form["MPI_TRXN_ID"].value +
+                form["MPI_ORI_TRXN_ID"].value +
+                form["MPI_PURCH_DATE"].value +
+                form["MPI_PURCH_CURR"].value +
+                form["MPI_PURCH_AMT"].value +
+                form["MPI_EMAIL"].value +
+                form["MPI_MOBILE_PHONE"].value +
+                form["MPI_MOBILE_PHONE_CC"].value +
+                form["MPI_ADDITIONAL_INFO_IND"].value +
+                form["MPI_RECURR_FREQ"].value +
+                form["MPI_RECURR_EXPIRY"].value;
+        
+            try {
+                const CLEAN_KEY = PRIVATE_KEY.replace(/^[ \t]+/gm, '');
+                let sig = new KJUR.crypto.Signature({"alg": "SHA256withRSA"});
+                sig.init(CLEAN_KEY); 
+                sig.updateString(rawString);
+                let sigValueHex = sig.sign();
+                let base64Value = hextob64(sigValueHex);
+                form["MPI_MAC"].value = base64Value.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+            } catch (e) {
+                console.error("Signing Error:", e);
+            }
         }
 
         async function executeTest(tc) {
-            let form = document.getElementById("form");
-            document.getElementById("MPI_TRANS_TYPE").value = tc.type;
+            let form = document.forms["form"];
+            form["MPI_TRANS_TYPE"].value = tc.type;
             initFields();
 
-            let mid = document.getElementById("MPI_MERC_ID").value;
-            let trxnId = document.getElementById("MPI_TRXN_ID").value;
+            let mid = form["MPI_MERC_ID"].value;
+            let trxnId = form["MPI_TRXN_ID"].value;
 
             let startTime = performance.now();
-            let mpResult = { MPI_ERROR_CODE: "ERR", MPI_TRXN_ID: trxnId };
 
             try {
-                // 1. Trigger mkReq first for the specific test case execution
+                // 1. Perform Key Exchange (mkReq)
                 let mkRes = await mkReq(mid, trxnId);
                 if (!mkRes || mkRes.errorCode !== "000") {
                     let endTime = performance.now();
@@ -256,42 +281,33 @@ BjUoANFzgScOUTPCSQACXQ==
                     };
                 }
 
-                // 2. Build raw data string using your exact fields sequence
-                const rawData = 
-                    document.forms["form"]["MPI_TRANS_TYPE"].value +
-                    document.forms["form"]["MPI_MERC_ID"].value +
-                    document.forms["form"]["MPI_PAN"].value +
-                    document.forms["form"]["MPI_CARD_HOLDER_NAME"].value +
-                    document.forms["form"]["MPI_PAN_EXP"].value +
-                    document.forms["form"]["MPI_CVV2"].value +
-                    document.forms["form"]["MPI_TRXN_ID"].value +
-                    document.forms["form"]["MPI_ORI_TRXN_ID"].value +
-                    document.forms["form"]["MPI_PURCH_DATE"].value +
-                    document.forms["form"]["MPI_PURCH_CURR"].value +
-                    document.forms["form"]["MPI_PURCH_AMT"].value +
-                    document.forms["form"]["MPI_EMAIL"].value +
-                    document.forms["form"]["MPI_MOBILE_PHONE"].value +
-                    document.forms["form"]["MPI_MOBILE_PHONE_CC"].value +
-                    document.forms["form"]["MPI_ADDITIONAL_INFO_IND"].value +
-                    document.forms["form"]["MPI_RECURR_FREQ"].value +
-                    document.forms["form"]["MPI_RECURR_EXPIRY"].value;
+                // 2. Generate MAC for Payload
+                generateMacForForm();
 
-                const signature = await signData(rawData, PRIVATE_KEY_PEM);
-                document.getElementById("MPI_MAC").value = signature;
+                // 3. Handle empty fields precisely like manual test script
+                const inputs = form.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    if (input.name !== "MPI_RESPONSE_TYPE" && !input.value.trim()) {
+                        input.disabled = true;
+                    }
+                });
 
-                // 3. Remove empty fields before submission to match gateway standards
+                // 4. Submit via Fetch to get JSON response (matching your manual CASE B)
                 const formData = new FormData(form);
                 const payload = new URLSearchParams();
-                formData.forEach((value, key) => { 
-                    if (value && value.trim() !== "") payload.append(key, value); 
+                formData.forEach((value, key) => {
+                    if (value.trim() !== "") payload.append(key, value);
                 });
+
+                // Re-enable form inputs immediately after building payload
+                inputs.forEach(input => input.disabled = false);
 
                 const mpResponse = await fetch(PAYMENT_REQUEST_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: payload
                 });
-                mpResult = await mpResponse.json();
+                const mpResult = await mpResponse.json();
 
                 let endTime = performance.now();
                 let duration = ((endTime - startTime) / 1000).toFixed(2) + "s";
