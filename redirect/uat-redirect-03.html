@@ -49,10 +49,11 @@
             <p id="inquiry-status-text" style="color: #e0e0e0;"></p>
         </div>
     </div>
+    
     <form id="inq-form" method="post" action="https://devlinkv2.paydee.co/mpigw/mpReq" target="inq_frame" style="display:none;">
         <input type="hidden" name="MPI_RETURN_URL" value="https://systemspc.vercel.app/api/uat-callback">
         <input type="hidden" name="MPI_TRANS_TYPE" value="INQ">
-        <input type="hidden" name="MPI_MERC_ID" value="000000000000003">
+        <input type="hidden" name="MPI_MERC_ID" id="INQ_MERC_ID">
         <input type="hidden" name="MPI_PURCH_DATE" id="INQ_PURCH_DATE">
         <input type="hidden" name="MPI_TRXN_ID" id="INQ_TRXN_ID">
         <input type="hidden" name="MPI_ORI_TRXN_ID" id="INQ_ORI_TRXN_ID">
@@ -62,14 +63,23 @@
     </form>
     <iframe name="inq_frame" style="display:none;"></iframe>
 
-    <script src="uat-inquiry-handler.js"></script>
+    <script src="inquiry-handler.js"></script>
     <script>
+        // Global variable accessible by inquiry-handler.js
+        let globalMerchantId = "";
+
         window.onload = function() {
             const params = new URLSearchParams(window.location.search);
             const qr = params.get('MPI_QR_CODE');
             const expiry = params.get('MPI_QR_EXPIRY_SECONDS');
+            const merc_id = params.get('MPI_MERC_ID');
             const tid = params.get('MPI_TRXN_ID') || params.get('MPI_TXN_ID');
             const amt = params.get('MPI_PURCH_AMT');
+
+            // Store MPI_MERC_ID globally so inquiry-handler.js can use it
+            if (merc_id) {
+                globalMerchantId = merc_id;
+            }
 
             // 1. Fill inputs (Manual entry fallback)
             if (tid) document.getElementById('manual_trxn_id').value = tid;
