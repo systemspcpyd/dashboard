@@ -49,6 +49,7 @@
             <p id="inquiry-status-text" style="color: #e0e0e0;"></p>
         </div>
     </div>
+    
     <form id="inq-form" method="post" action="https://linkv2.paydee.co/mpigw/mpReq" target="inq_frame" style="display:none;">
         <input type="hidden" name="MPI_RETURN_URL" value="https://systemspc.vercel.app/api/callback">
         <input type="hidden" name="MPI_TRANS_TYPE" value="INQ">
@@ -64,6 +65,9 @@
 
     <script src="inquiry-handler.js"></script>
     <script>
+        // Global variable accessible by inquiry-handler.js
+        let globalMerchantId = "";
+
         window.onload = function() {
             const params = new URLSearchParams(window.location.search);
             const qr = params.get('MPI_QR_CODE');
@@ -71,6 +75,11 @@
             const merc_id = params.get('MPI_MERC_ID');
             const tid = params.get('MPI_TRXN_ID') || params.get('MPI_TXN_ID');
             const amt = params.get('MPI_PURCH_AMT');
+
+            // Store MPI_MERC_ID globally so inquiry-handler.js can use it
+            if (merc_id) {
+                globalMerchantId = merc_id;
+            }
 
             // 1. Fill inputs (Manual entry fallback)
             if (tid) document.getElementById('manual_trxn_id').value = tid;
