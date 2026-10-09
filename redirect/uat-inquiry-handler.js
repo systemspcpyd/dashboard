@@ -32,15 +32,10 @@ BjUoANFzgScOUTPCSQACXQ==
 
 /**
  * 1. TRIGGER INQUIRY (INQ)
- * Called when user clicks "Check Status"
  */
-// ... Configuration (Keys/URL) stays the same as before ...
-
 async function triggerInquiry() {
-    // 1. GET DATA FROM USER INPUTS
     const originalTrxnId = document.getElementById('manual_trxn_id').value.trim();
     const amount = document.getElementById('manual_amount').value.trim();
-
     const statusLabel = document.getElementById("inquiry-status-text");
 
     if (!originalTrxnId || !amount) {
@@ -48,29 +43,31 @@ async function triggerInquiry() {
         return;
     }
 
-    if (statusLabel) statusLabel.innerText = "Checking status...";
+    if (statusLabel) {
+        statusLabel.innerText = "Checking status...";
+        statusLabel.style.color = "#e0e0e0";
+    }
 
-    // 2. Generate Metadata
     const d = new Date();
     const ts = d.getFullYear() + (d.getMonth() + 1).toString().padStart(2, '0') + 
                d.getDate().toString().padStart(2, '0') + d.getHours().toString().padStart(2, '0') + 
                d.getMinutes().toString().padStart(2, '0') + d.getSeconds().toString().padStart(2, '0');
     
     const inqId = "INQ" + ts;
+    const mid = globalMerchantId.trim();
 
-    // 3. Map to Hidden Form
+    document.getElementById("INQ_MERC_ID").value = mid;
     document.getElementById("INQ_PURCH_DATE").value = ts;
     document.getElementById("INQ_TRXN_ID").value = inqId;
     document.getElementById("INQ_ORI_TRXN_ID").value = originalTrxnId;
     document.getElementById("INQ_PURCH_AMT").value = amount;
 
     try {
-        // Step A: Key Exchange
         const mkRes = await fetch(KEY_EXCHANGE_URL, {
             method: 'POST',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                "merchantId": "000000000000003",
+                "merchantId": mid || "000000000000001",
                 "pubKey": PUBLICKEY,
                 "purchaseId": inqId
             })
@@ -78,21 +75,20 @@ async function triggerInquiry() {
         const mkResult = await mkRes.json();
         if (mkResult.errorCode !== "000") throw new Error("Key Exchange Failed");
 
-        // Step B: RSA Sign
-        const rawData = "INQ" + "000000000000003" + inqId + originalTrxnId + ts + "458" + amount;
+        const rawData = "INQ" + (mid || "000000000000001") + inqId + originalTrxnId + ts + "458" + amount;
         const signature = await signData(rawData, PRIVATE_KEY_PEM);
         document.getElementById("INQ_MAC").value = signature;
 
-        // Step C: Submit
         document.getElementById("inq-form").submit();
 
     } catch (err) {
         console.error(err);
-        if (statusLabel) statusLabel.innerText = "Error: " + err.message;
+        if (statusLabel) {
+            statusLabel.innerText = "Error: " + err.message;
+            statusLabel.style.color = "#ff4757";
+        }
     }
 }
-
-// ... signData and window listener remain the same ...
 
 /**
  * 2. RSA SIGNING UTILITIES
@@ -118,21 +114,38 @@ async function signData(message, pem) {
 }
 
 /**
- * 3. LISTEN FOR CALLBACK RESPONSE (postMessage)
+ * 3. LISTEN FOR IFRAME RESPONSE LOAD
  */
-window.addEventListener("message", function(event) {
-    // Safety check for origin can be added here if needed
-    const data = event.data;
-    const statusLabel = document.getElementById("inquiry-status-text");
+document.addEventListener("DOMContentLoaded", function() {
+    const iframe = document.querySelector('iframe[name="inq_frame"]');
+    if (iframe) {
+        iframe.onload = function() {
+            try {
+                const iframeURL = iframe.contentWindow.location.href;
+                
+                // Only process when iframe redirects back to our domain
+                if (iframeURL.includes("systemspc.vercel.app")) {
+                    const urlParams = new URLSearchParams(iframe.contentWindow.location.search);
+                    const errorCode = urlParams.get('MPI_ERROR_CODE');
+                    const statusLabel = document.getElementById("inquiry-status-text");
 
-    if (data.MPI_ERROR_CODE === "004") {
-        if (statusLabel) {
-            statusLabel.innerText = "Transaction in-processing...";
-            statusLabel.style.color = "orange";
-        }
-    } else if (data.MPI_ERROR_CODE) {
-        // Any status other than 004 means finality (Success or Fail)
-        const query = new URLSearchParams(data).toString();
-        window.location.href = `/payment-status.html?${query}`;
+                    if (!errorCode) return;
+
+                    if (errorCode === "004") {
+                        if (statusLabel) {
+                            statusLabel.innerText = "Transaction In Processing";
+                            statusLabel.style.color = "orange";
+                        }
+                    } else {
+                        // Any code other than 004 redirects to status page with full parameters
+                        const query = urlParams.toString();
+                        window.location.href = `/payment-status.html?${query}`;
+                    }
+                }
+            } catch (e) {
+                // Cross-origin restriction while iframe is hitting paydee.co directly (expected)
+                console.log("Waiting for gateway redirect...");
+            }
+        };
     }
 });
