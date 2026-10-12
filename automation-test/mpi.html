@@ -15,6 +15,8 @@
         .success { color: green; font-weight: bold; }
         .fail { color: red; font-weight: bold; }
         .controls { margin-bottom: 15px; }
+        label { display: block; margin-top: 8px; font-weight: bold; font-size: 12px; }
+        input, select, textarea { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -42,13 +44,21 @@
                 <!-- Populated dynamically via script -->
             </tbody>
         </table>
+
+        <hr style="margin: 20px 0;">
+
+        <!-- Manual Testing Form Controls -->
+        <h3>Manual Single Test Controls</h3>
+        <button onclick="clear_mac()">Generate MAC</button><br><br>
+        <button onclick="mkReq()">Key Exchange</button>
+        <button type="button" onclick="mpReq()">Pay (Submit Form)</button>
     </div>
 
-    <!-- RIGHT PANEL: Results Log -->
+    <!-- RIGHT PANEL: Results Log & Form Fields -->
     <div class="panel">
         <h3>Execution Results</h3>
         <div id="summary" style="margin-bottom: 10px; font-weight: bold;"></div>
-        <table id="resultsTable">
+        <table id="resultsTable" style="margin-bottom: 20px;">
             <thead>
                 <tr>
                     <th>Test</th>
@@ -63,53 +73,91 @@
                 <!-- Results populated here -->
             </tbody>
         </table>
+
+        <h3>Payload Data Fields</h3>
+        <form id="form" method="post" action="">
+            <label for="MPI_TRANS_TYPE">MPI_TRANS_TYPE:</label>
+            <select name="MPI_TRANS_TYPE" id="MPI_TRANS_TYPE">
+              <option value="SALES">SALES</option>
+              <option value="INITRECURR">INITRECURR</option>
+              <option value="PRERECURR">PRERECURR</option>
+              <option value="RECURR">RECURR</option>
+              <option value="INQ">INQ</option>
+              <option value="VSALES">VSALES</option>
+              <option value="REFUND">REFUND</option>
+              <option value="PREAUTH">PREAUTH</option>
+              <option value="SALESCOMPL">SALESCOMPL</option>
+              <option value="TERMINATE">TERMINATE</option> 
+              <option value="N3D_RECURR">N3D_RECURR</option> 
+              <option value="RFN3DRECUR">RFN3DRECUR</option> 
+            </select>
+            
+            <label for="MPI_MERC_ID">MPI_MERC_ID:</label>
+            <input type="text" name="MPI_MERC_ID" value="000000000000033" maxlength="15">
+            
+            <label for="MPI_PAN">MPI_PAN:</label>
+            <input type="text" name="MPI_PAN" maxlength="19" value="4100000000005000">
+
+            <label for="MPI_PAN_EXP">MPI_PAN_EXP (YYMM):</label>
+            <input type="text" name="MPI_PAN_EXP" maxlength="4" value="3012">
+            
+            <label for="MPI_CVV2">MPI_CVV2:</label>
+            <input type="text" name="MPI_CVV2" maxlength="3" value="123">
+            
+            <label for="MPI_CARD_HOLDER_NAME">MPI_CARD_HOLDER_NAME:</label>
+            <input type="text" name="MPI_CARD_HOLDER_NAME" maxlength="45" value="TEST DOE">
+            
+            <label for="MPI_PURCH_DATE">MPI_PURCH_DATE:</label>
+            <input type="text" name="MPI_PURCH_DATE" maxlength="14">
+            
+            <label for="MPI_TRXN_ID">MPI_TRXN_ID:</label>
+            <input type="text" name="MPI_TRXN_ID" maxlength="20">
+            
+            <label for="MPI_ORI_TRXN_ID">MPI_ORI_TRXN_ID:</label>
+            <input type="text" name="MPI_ORI_TRXN_ID" maxlength="20" value="">
+
+            <label for="MPI_PURCH_CURR">MPI_PURCH_CURR:</label>
+            <input type="text" name="MPI_PURCH_CURR" value="458" maxlength="3">
+            
+            <label for="MPI_PURCH_AMT">MPI_PURCH_AMT:</label>
+            <input type="text" name="MPI_PURCH_AMT" value="200" maxlength="19">
+            
+            <label for="MPI_ADDITIONAL_INFO_IND">MPI_ADDITIONAL_INFO_IND:</label>
+            <select name="MPI_ADDITIONAL_INFO_IND" id="MPI_ADDITIONAL_INFO_IND">
+                <option value=""></option>
+                <option value="Y">Y</option>
+            </select>
+            
+            <label for="MPI_EMAIL">MPI_EMAIL:</label>
+            <input type="text" name="MPI_EMAIL" value="systemspc@paydee.co" maxlength="254">
+
+            <label for="MPI_MOBILE_PHONE_CC">MPI_MOBILE_PHONE_CC:</label>
+            <input type="text" name="MPI_MOBILE_PHONE_CC" value="60" maxlength="3">     
+
+            <label for="MPI_MOBILE_PHONE">MPI_MOBILE_PHONE:</label>
+            <input type="text" name="MPI_MOBILE_PHONE" value="123456789" maxlength="15">     
+             
+            <label for="MPI_RECURR_FREQ">MPI_RECURR_FREQ:</label>
+            <input type="text" name="MPI_RECURR_FREQ" maxlength="4">
+            
+            <label for="MPI_RECURR_EXPIRY">MPI_RECURR_EXPIRY (YYYYMMDD):</label>
+            <input type="text" name="MPI_RECURR_EXPIRY" maxlength="8">
+                    
+            <label for="MPI_MAC">MPI_MAC (Signed MAC):</label>
+            <textarea name="MPI_MAC" maxlength="344" rows="3"></textarea>
+            
+            <input type="hidden" name="MPI_RESPONSE_TYPE" id="MPI_RESPONSE_TYPE" value="">
+         </form>
+         <form id="redirect-form" method="POST" style="display:none;"></form>
     </div>
 </div>
 
-<!-- Hidden form containing payload data fields -->
-<div style="display:none;">
- <form id="form" method="post" action="">
-    <select name="MPI_TRANS_TYPE" id="MPI_TRANS_TYPE">
-      <option value="SALES">SALES</option>
-      <option value="INITRECURR">INITRECURR</option>
-      <option value="PRERECURR">PRERECURR</option>
-      <option value="RECURR">RECURR</option>
-      <option value="INQ">INQ</option>
-      <option value="VSALES">VSALES</option>
-      <option value="REFUND">REFUND</option>
-      <option value="PREAUTH">PREAUTH</option>
-      <option value="SALESCOMPL">SALESCOMPL</option>
-      <option value="TERMINATE">TERMINATE</option> 
-      <option value="N3D_RECURR">N3D_RECURR</option> 
-      <option value="RFN3DRECUR">RFN3DRECUR</option> 
-    </select>
-    <input type="text" name="MPI_MERC_ID" value="000000000000033">
-    <input type="text" name="MPI_PAN" value="4100000000000100">
-    <input type="text" name="MPI_PAN_EXP" value="3012">
-    <input type="text" name="MPI_CVV2" value="123">
-    <input type="text" name="MPI_CARD_HOLDER_NAME" value="TEST DOE">
-    <input type="text" name="MPI_PURCH_DATE">
-    <input type="text" name="MPI_TRXN_ID">
-    <input type="text" name="MPI_ORI_TRXN_ID" value="">
-    <input type="text" name="MPI_PURCH_CURR" value="458">
-    <input type="text" name="MPI_PURCH_AMT" value="200">
-    <select name="MPI_ADDITIONAL_INFO_IND" id="MPI_ADDITIONAL_INFO_IND">
-        <option value=""></option>
-        <option value="Y">Y</option>
-    </select>
-    <input type="text" name="MPI_EMAIL" value="systemspc@paydee.co">
-    <input type="text" name="MPI_MOBILE_PHONE_CC" value="60">     
-    <input type="text" name="MPI_MOBILE_PHONE" value="123456789">     
-    <input type="text" name="MPI_RECURR_FREQ" value="">
-    <input type="text" name="MPI_RECURR_EXPIRY" value="">
-    <textarea name="MPI_MAC"></textarea>
- </form>
-</div>
-
- <script>
+<script>
         const KEY_EXCHANGE_URL = "https://systemspc.vercel.app/api/key-exchange-uat";
         const PAYMENT_REQUEST_URL = "https://systemspc.vercel.app/api/mpReq";
-        const PUBLICKEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq8j2SHHfzMLlhYppnlk-QqjjjZwMkhK6s6rERd0JhhY_6-Md4Z0327uEdfNbJrSEPJVPT55gjRhx4MorEhrabuafuY8thSPS4epwkOjjPtELwZxViWe1dzG5TQakJ_i8ZOQuUYFJg02RcwUTzE3ty-x7mkwj9t2wAdRqTagyaDIAVMTxP_Y4AS76xjA3aH43Q0HKHGAxxIlXBIQxImuPhlUbPtVtTHIsUwkIx2BDh8kPZ3Mgr3Cyky0F-cHpEFSi3rPSSLD_FVHlJRW2cODVm8E-s98CURQYs1npzDztzZgZPnnb9K57CB2Z50Ve6qUV7z4-uHs3nehiMJHktIs7LQIDAQAB";
+        const VERCEL_CALLBACK_URL = "https://systemspc.vercel.app/api/callback";
+        const PUBLICKEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq8j2SHHfzMLlhYppnlk-QqjjjZwMkhK6s6rERd0JhhY_6-Md4Z0327uEdfNbJrSEPJVPT55gjRhx4MorEhrabuafuY8thSPS4epwkOjjPtELwZxViWe1dzG5TQakJ_i8ZOQuUYFJg02RcwUTzE3ty-x7mkwj9t2wAdRqTagyaDIAVMTxP_Y4AS76xjA3aH43Q0HKHGAxxIlXBIQxImuPhlUbPtVtTHIsUwkIx2BDh8kPZ3Mgr3Cyky0F-cHpEFSi3rPSSLD/FVHlJRW2cODVm8E-s98CURQYs1npzDztzZgZPnnb9K57CB2Z50Ve6qUV7z4-uHs3nehiMJHktIs7LQIDAQAB";
+        
         const PRIVATE_KEY = `-----BEGIN RSA PRIVATE KEY-----
         MIIEogIBAAKCAQEAq8j2SHHfzMLlhYppnlk+QqjjjZwMkhK6s6rERd0JhhY/6+Md
         4Z0327uEdfNbJrSEPJVPT55gjRhx4MorEhrabuafuY8thSPS4epwkOjjPtELwZxV
@@ -155,6 +203,7 @@
 
         window.onload = function() {
             renderTable();
+            initFields();
         };
 
         function renderTable() {
@@ -203,20 +252,30 @@
             document.forms["form"]["MPI_TRXN_ID"].value = "MPIOTO" + x;
         }
 
-        async function mkReq(mid, trxnId) {
+        async function mkReq() {
+            let MID = document.forms["form"]["MPI_MERC_ID"].value;
+            let transactionID = document.forms["form"]["MPI_TRXN_ID"].value;
+
             try {
                 const response = await fetch(KEY_EXCHANGE_URL, {
                     method: 'POST',
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        "merchantId": mid,
+                        "merchantId": MID,
                         "pubKey": PUBLICKEY,
-                        "purchaseId": trxnId
+                        "purchaseId": transactionID
                     })
                 });
-                return await response.json(); 
+                const result = await response.json(); 
+                if (result.errorCode === "000") {
+                    alert(`✅ Key Exchange Success!\nCode: ${result.errorCode}`);
+                } else {
+                    alert(`❌ Key Exchange Failed\nCode: ${result.errorCode}`);
+                }
+                return result;
             } catch (error) {
                 console.error("Key Exchange Exception:", error);
+                alert("⚠️ Key Exchange Exception. Check console.");
                 return { errorCode: "EXCEPTION", errorMessage: error.message };
             }
         }
@@ -256,6 +315,11 @@
             }
         }
 
+        function clear_mac() {
+            generateMacForForm();
+            alert("MAC Generated Successfully!");
+        }
+
         async function executeTest(tc) {
             let form = document.forms["form"];
             form["MPI_TRANS_TYPE"].value = tc.type;
@@ -267,8 +331,7 @@
             let startTime = performance.now();
 
             try {
-                // 1. Perform Key Exchange (mkReq)
-                let mkRes = await mkReq(mid, trxnId);
+                let mkRes = await mkReq();
                 if (!mkRes || mkRes.errorCode !== "000") {
                     let endTime = performance.now();
                     return {
@@ -281,10 +344,8 @@
                     };
                 }
 
-                // 2. Generate MAC for Payload with all fields intact
                 generateMacForForm();
 
-                // 3. Disable empty fields just like your manual script before building URLSearchParams
                 const inputs = form.querySelectorAll('input, select, textarea');
                 inputs.forEach(input => {
                     if (!input.value.trim()) {
@@ -298,7 +359,6 @@
                     if (value.trim() !== "") payload.append(key, value);
                 });
 
-                // Re-enable form inputs immediately after payload generation
                 inputs.forEach(input => input.disabled = false);
 
                 const mpResponse = await fetch(PAYMENT_REQUEST_URL, {
@@ -391,6 +451,13 @@
             }
 
             document.getElementById("summary").innerText = `Finished! Passed: ${passedCount} / ${activeCases.length}`;
+        }
+
+        async function mpReq() {
+            generateMacForForm();
+            const form = document.getElementById("form");
+            form.action = PAYMENT_REQUEST_URL;
+            form.submit();
         }
     </script>
 </body>
