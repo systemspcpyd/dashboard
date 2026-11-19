@@ -8,22 +8,33 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // 2. Ensure only POST requests go through to the gateway
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    // 3. Forward the request to Paydee's gateway
+    // Ensure body is properly formatted as a string
+    const requestBody = typeof req.body === 'object' ? JSON.stringify(req.body) : req.body;
+
     const response = await fetch("https://devlinkv2.paydee.co/mpigw/mkReq", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(req.body)
+      body: requestBody
     });
 
-    const data = await response.json();
+    const textResponse = await response.text();
+    
+    // Try parsing response from Paydee as JSON, fallback to text if it isn't JSON
+    let data;
+    try {
+      data = JSON.parse(textResponse);
+    } catch (e) {
+      data = { rawResponse: textResponse };
+    }
+
     return res.status(200).json(data);
   } catch (error) {
+    console.error("Proxy Error:", error);
     return res.status(500).json({ error: error.message });
   }
 }
