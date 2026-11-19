@@ -21,6 +21,7 @@ export default async function handler(req, res) {
       headers: {
         'Content-Type': 'application/json',
       },
+      mode: 'no-cors',
       body: JSON.stringify(req.body),
     });
 
