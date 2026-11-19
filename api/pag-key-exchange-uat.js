@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const KEY_EXCHANGE_URL = "https://devlinkv2.paydee.co/mpi/mkReq";
+    const KEY_EXCHANGE_URL = "https://devlinkv2.paydee.co/mpigw/mkReq";
 
     const response = await fetch(KEY_EXCHANGE_URL, {
       method: 'POST',
